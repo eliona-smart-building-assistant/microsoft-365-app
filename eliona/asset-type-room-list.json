@@ -1,0 +1,12 @@
+{
+	"attributes": [],
+	"custom": true,
+	"icon": "closable",
+	"name": "ms_graph_room_list",
+	"translation": {
+		"de": "MS Graph Raum Liste",
+		"en": "MS Graph Room List"
+	},
+	"urldoc": "https://learn.microsoft.com/en-us/graph/api/resources/roomlist?view=graph-rest-1.0",
+	"vendor": "MS Graph"
+}

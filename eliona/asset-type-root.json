@@ -1,0 +1,11 @@
+{
+	"attributes": [],
+	"custom": true,
+	"icon": "building",
+	"name": "ms_graph_root",
+	"translation": {
+		"de": "MS Graph Root Asset",
+		"en": "MS Graph root asset"
+	},
+	"vendor": "MS Graph"
+}
