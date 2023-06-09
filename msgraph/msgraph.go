@@ -122,7 +122,7 @@ func (g *GraphHelper) SendMail(subject *string, body *string, recipient *string)
 	return g.userClient.Me().SendMail().Post(context.Background(), sendMailBody, nil)
 }
 
-func (g *GraphHelper) MakeGraphCall() error {
+func (g *GraphHelper) GetRooms() error {
 	// INSERT YOUR CODE HERE
 	return nil
 }

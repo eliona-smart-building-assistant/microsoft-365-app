@@ -16,20 +16,90 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"net/http"
 	"template/apiserver"
 	"template/apiservices"
+	"template/conf"
+	"template/msgraph"
+	"time"
 
 	"github.com/eliona-smart-building-assistant/go-utils/common"
 	"github.com/eliona-smart-building-assistant/go-utils/log"
 )
 
-// doAnything is the main app function which is called periodically
-func doAnything() {
+// collectData is the main app function which is called periodically
+func collectData() {
+	configs, err := conf.GetConfigs(context.Background())
+	if err != nil {
+		log.Fatal("conf", "Couldn't read configs from DB: %v", err)
+		return
+	}
+	if len(configs) == 0 {
+		log.Info("conf", "No configs in DB")
+		return
+	}
 
-	// Todo: implement everything the app should do
-	log.Debug("main", "do anything")
+	for _, config := range configs {
+		if !conf.IsConfigEnabled(config) {
+			if conf.IsConfigActive(config) {
+				conf.SetConfigActiveState(context.Background(), config, false)
+			}
+			continue
+		}
 
+		if !conf.IsConfigActive(config) {
+			conf.SetConfigActiveState(context.Background(), config, true)
+			log.Info("conf", "Collecting initialized with Configuration %d:\n"+
+				"Enable: %t\n"+
+				"Refresh Interval: %d\n"+
+				"Request Timeout: %d\n"+
+				"Project IDs: %v\n",
+				*config.Id,
+				*config.Enable,
+				config.RefreshInterval,
+				*config.RequestTimeout,
+				*config.ProjectIDs)
+		}
+
+		common.RunOnceWithParam(func(config apiserver.Configuration) {
+			log.Info("main", "Collecting %d started", *config.Id)
+
+			if err := collectRooms(config); err != nil {
+				return // Error is handled in the method itself.
+			}
+
+			log.Info("main", "Collecting %d finished", *config.Id)
+
+			time.Sleep(time.Second * time.Duration(config.RefreshInterval))
+		}, config, *config.Id)
+	}
+}
+
+func collectRooms(config apiserver.Configuration) error {
+	graph := msgraph.NewGraphHelper()
+	if err := graph.InitializeGraphForUserAuth(config.ClientId, config.TenantId, []string{}); err != nil {
+		log.Error("ms-graph", "initializing graph for user auth: %v", err)
+		return err
+	}
+	fmt.Printf("%+v", graph)
+
+	// rooms, err := msgraph.GetRooms(config)
+	// if err != nil {
+	// 	log.Error("ms-graph", "getting rooms: %v", err)
+	// 	return err
+	// }
+	// if err := eliona.CreateRoomsAssetsIfNecessary(config, rooms); err != nil {
+	// 	log.Error("eliona", "creating location assets: %v", err)
+	// 	return err
+	// }
+
+	// if err := eliona.UpsertRoomData(config, rooms); err != nil {
+	// 	log.Error("eliona", "inserting location data into Eliona: %v", err)
+	// 	return err
+	// }
+	return nil
 }
 
 // listenApi starts the API server and listen for requests

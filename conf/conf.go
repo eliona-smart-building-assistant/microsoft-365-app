@@ -136,3 +136,32 @@ func GetConfigs(ctx context.Context) ([]apiserver.Configuration, error) {
 	}
 	return apiConfigs, nil
 }
+
+func SetConfigActiveState(ctx context.Context, config apiserver.Configuration, state bool) (int64, error) {
+	return appdb.Configurations(
+		appdb.ConfigurationWhere.ID.EQ(null.Int64FromPtr(config.Id).Int64),
+	).UpdateAllG(ctx, appdb.M{
+		appdb.ConfigurationColumns.Active: state,
+	})
+}
+
+func ProjIds(config apiserver.Configuration) []string {
+	if config.ProjectIDs == nil {
+		return []string{}
+	}
+	return *config.ProjectIDs
+}
+
+func IsConfigActive(config apiserver.Configuration) bool {
+	return config.Active == nil || *config.Active
+}
+
+func IsConfigEnabled(config apiserver.Configuration) bool {
+	return config.Enable == nil || *config.Enable
+}
+
+func SetAllConfigsInactive(ctx context.Context) (int64, error) {
+	return appdb.Configurations().UpdateAllG(ctx, appdb.M{
+		appdb.ConfigurationColumns.Active: false,
+	})
+}
