@@ -9,6 +9,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/microsoft/kiota-authentication-azure-go v1.0.0
 	github.com/microsoftgraph/msgraph-sdk-go v1.5.0
+	github.com/volatiletech/null v8.0.0+incompatible
 	github.com/volatiletech/null/v8 v8.1.2
 	github.com/volatiletech/sqlboiler/v4 v4.14.2
 	gopkg.in/yaml.v3 v3.0.1
@@ -63,6 +64,7 @@ require (
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/spf13/cast v1.5.1 // indirect
 	github.com/volatiletech/inflect v0.0.1 // indirect
+	github.com/volatiletech/sqlboiler v3.7.1+incompatible
 	github.com/volatiletech/strmangle v0.0.4
 	golang.org/x/crypto v0.9.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
