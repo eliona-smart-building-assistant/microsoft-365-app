@@ -13,8 +13,33 @@
 --  DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 --  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-create schema if not exists template;
+create schema if not exists ms_graph;
 
---
--- Todo: create tables and database objects necessary for this app like tables persisting configuration
---
+-- Should be editable by eliona frontend.
+create table if not exists ms_graph.configuration
+(
+	id               bigserial primary key,
+	client_id        text not null,
+	client_secret    text not null,
+	tenant_id        text not null,
+	username         text,
+	password         text,
+	refresh_interval integer not null default 60,
+	request_timeout  integer not null default 120,
+	asset_filter     json,
+	active           boolean default false,
+	enable           boolean default false,
+	project_ids      text[]
+);
+
+create table if not exists ms_graph.room
+(
+	id               bigserial primary key,
+	configuration_id bigserial not null references ms_graph.configuration(id),
+	project_id       text      not null,
+	global_asset_id  text      not null,
+	asset_id         integer
+);
+
+-- Makes the new objects available for all other init steps
+commit;
