@@ -146,14 +146,80 @@ components:
   schemas:
     Configuration:
       type: object
-      description: Simply a example configuration
+      description: Each configuration defines access to MS Graph.
       properties:
         id:
           type: integer
           format: int64
-          description: A id identifying the example configuration
+          description: Internal identifier for the configured API (created automatically).
           readOnly: true
           nullable: true
-        config:
+        clientId:
           type: string
-          description: Configuration data for example
+          description: Client ID
+        clientSecret:
+          type: string
+          description: Client Secret
+        tenantId:
+          type: string
+          description: Tenant ID
+        username:
+          type: string
+          description: Username
+          nullable: true
+        password:
+          type: string
+          description: Password
+          nullable: true
+        enable:
+          type: boolean
+          description: Flag to enable or disable fetching from this API
+          default: true
+          nullable: true
+        refreshInterval:
+          type: integer
+          description: Interval in seconds for collecting data from API
+          default: 60
+        requestTimeout:
+          type: integer
+          description: Timeout in seconds
+          default: 120
+          nullable: true
+        assetFilter:
+          $ref: "#/components/schemas/AssetFilter"
+          nullable: true
+          example: [[{ "parameter": "Name", "regex": ".*Lobby.*" }]]
+        active:
+          type: boolean
+          readOnly: true
+          description: Set to `true` by the app when running and to `false` when app is stopped
+          nullable: true
+        projectIDs:
+          type: array
+          description: List of Eliona project ids for which this device should collect data. For each project id all smart devices are automatically created as an asset in Eliona. The mapping to Eliona assets is stored as an asset mapping in the MS Graph app.
+          nullable: true
+          items:
+            type: string
+          example:
+            - "42"
+            - "99"
+
+    AssetFilter:
+      type: array
+      description: Array of rules combined by logical OR
+      items:
+        type: array
+        description: Array of rules combined by logical AND
+        items:
+          $ref: "#/components/schemas/FilterRule"
+
+    FilterRule:
+      type: object
+      description: Asset selection rule. Possible parameters are defined in app's documentation.
+      properties:
+        parameter:
+          type: string
+          example: "name"
+        regex:
+          type: string
+          example: "^MS Graph.*$"
