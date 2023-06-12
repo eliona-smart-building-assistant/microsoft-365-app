@@ -72,18 +72,17 @@ func collectData() {
 
 		cachedConfigWithHelper, found := configCache[*config.Id]
 		if !found || !sameLogin(cachedConfigWithHelper.Config, config) {
-			// todo: refresh also if same login, but different config
 			graph := msgraph.NewGraphHelper()
 			if err := graph.InitializeGraphForUserAuth(config.ClientId, config.TenantId, []string{}); err != nil {
 				log.Error("ms-graph", "initializing graph for user auth: %v", err)
 				continue
 			}
-
-			// Update the cache.
-			configCache[*config.Id] = ConfigurationWithHelper{
-				Config: config,
-				Graph:  graph,
-			}
+			cachedConfigWithHelper.Graph = graph
+		}
+		// Update the cache.
+		configCache[*config.Id] = ConfigurationWithHelper{
+			Config: config,
+			Graph:  cachedConfigWithHelper.Graph,
 		}
 
 		common.RunOnceWithParam(func(configH ConfigurationWithHelper) {
