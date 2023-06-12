@@ -9,6 +9,7 @@ import (
 	auth "github.com/microsoft/kiota-authentication-azure-go"
 	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
+	"github.com/microsoftgraph/msgraph-sdk-go/models/odataerrors"
 	"github.com/microsoftgraph/msgraph-sdk-go/users"
 )
 
@@ -125,8 +126,23 @@ func (g *GraphHelper) SendMail(subject *string, body *string, recipient *string)
 func (g *GraphHelper) GetRooms() error {
 	r, err := g.userClient.Me().Get(context.Background(), nil)
 	if err != nil {
-		return fmt.Errorf("querying API: %v", err)
+		printOdataError(err)
+		return fmt.Errorf("querying API: %+v", err)
 	}
 	fmt.Printf("%+v\n", r)
 	return nil
+}
+
+func printOdataError(err error) {
+	switch err.(type) {
+	case *odataerrors.ODataError:
+		typed := err.(*odataerrors.ODataError)
+		fmt.Printf("error: %v\n", typed.Error())
+		if terr := typed.GetError(); terr != nil {
+			fmt.Printf("code: %s\n", *terr.GetCode())
+			fmt.Printf("msg: %s\n", *terr.GetMessage())
+		}
+	default:
+		fmt.Printf("%T > error: %#v", err, err)
+	}
 }
