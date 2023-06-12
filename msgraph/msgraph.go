@@ -8,6 +8,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	auth "github.com/microsoft/kiota-authentication-azure-go"
 	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
+	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/models/odataerrors"
 	"github.com/microsoftgraph/msgraph-sdk-go/users"
@@ -124,11 +125,31 @@ func (g *GraphHelper) SendMail(subject *string, body *string, recipient *string)
 }
 
 func (g *GraphHelper) GetRooms() error {
-	r, err := g.userClient.Me().Get(context.Background(), nil)
+	r, err := g.userClient.Places().GraphRoom().Get(context.Background(), nil)
 	if err != nil {
 		printOdataError(err)
 		return fmt.Errorf("querying API: %+v", err)
 	}
+
+	pageIterator, err := msgraphcore.NewPageIterator[*models.Room](
+		r, g.userClient.GetAdapter(), models.CreateRoomFromDiscriminatorValue,
+	)
+	if err != nil {
+		return fmt.Errorf("getting iterator: %v", err)
+	}
+
+	err = pageIterator.Iterate(context.Background(), func(room *models.Room) bool {
+		fmt.Printf("%+v\n", *room)
+		fmt.Printf("%v\n", *room.GetId())
+		fmt.Printf("%v\n", *room.GetDisplayName())
+		// Return true to continue the iteration
+		return true
+	})
+	if err != nil {
+		return fmt.Errorf("iterating: %v", err)
+	}
+
+	fmt.Println("succeeeeeessss!")
 	fmt.Printf("%+v\n", r)
 	return nil
 }
