@@ -123,6 +123,10 @@ func (g *GraphHelper) SendMail(subject *string, body *string, recipient *string)
 }
 
 func (g *GraphHelper) GetRooms() error {
-	// INSERT YOUR CODE HERE
+	r, err := g.userClient.Me().Get(context.Background(), nil)
+	if err != nil {
+		return fmt.Errorf("querying API: %v", err)
+	}
+	fmt.Printf("%+v\n", r)
 	return nil
 }
