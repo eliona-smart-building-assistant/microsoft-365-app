@@ -73,7 +73,10 @@ func collectData() {
 		cachedConfigWithHelper, found := configCache[*config.Id]
 		if !found || !sameLogin(cachedConfigWithHelper.Config, config) {
 			graph := msgraph.NewGraphHelper()
-			if err := graph.InitializeGraphForUserAuth(config.ClientId, config.TenantId, []string{}); err != nil {
+			if config.ClientSecret == nil || config.Username == nil || config.Password == nil {
+				log.Error("conf", "Shouldn't happen: some values are nil")
+			}
+			if err := graph.InitializeGraphForUserAuth(config.ClientId, config.TenantId, *config.ClientSecret, *config.Username, *config.Password); err != nil {
 				log.Error("ms-graph", "initializing graph for user auth: %v", err)
 				continue
 			}

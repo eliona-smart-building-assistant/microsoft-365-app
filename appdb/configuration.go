@@ -29,8 +29,8 @@ type Configuration struct {
 	ClientID        string            `boil:"client_id" json:"client_id" toml:"client_id" yaml:"client_id"`
 	ClientSecret    string            `boil:"client_secret" json:"client_secret" toml:"client_secret" yaml:"client_secret"`
 	TenantID        string            `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
-	Username        null.String       `boil:"username" json:"username,omitempty" toml:"username" yaml:"username,omitempty"`
-	Password        null.String       `boil:"password" json:"password,omitempty" toml:"password" yaml:"password,omitempty"`
+	Username        string            `boil:"username" json:"username" toml:"username" yaml:"username"`
+	Password        string            `boil:"password" json:"password" toml:"password" yaml:"password"`
 	RefreshInterval int32             `boil:"refresh_interval" json:"refresh_interval" toml:"refresh_interval" yaml:"refresh_interval"`
 	RequestTimeout  int32             `boil:"request_timeout" json:"request_timeout" toml:"request_timeout" yaml:"request_timeout"`
 	AssetFilter     null.JSON         `boil:"asset_filter" json:"asset_filter,omitempty" toml:"asset_filter" yaml:"asset_filter,omitempty"`
@@ -146,44 +146,6 @@ func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
 	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
 }
 
-type whereHelpernull_String struct{ field string }
-
-func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-func (w whereHelpernull_String) IN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
-}
-func (w whereHelpernull_String) NIN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
-}
-
-func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-
 type whereHelperint32 struct{ field string }
 
 func (w whereHelperint32) EQ(x int32) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
@@ -286,8 +248,8 @@ var ConfigurationWhere = struct {
 	ClientID        whereHelperstring
 	ClientSecret    whereHelperstring
 	TenantID        whereHelperstring
-	Username        whereHelpernull_String
-	Password        whereHelpernull_String
+	Username        whereHelperstring
+	Password        whereHelperstring
 	RefreshInterval whereHelperint32
 	RequestTimeout  whereHelperint32
 	AssetFilter     whereHelpernull_JSON
@@ -299,8 +261,8 @@ var ConfigurationWhere = struct {
 	ClientID:        whereHelperstring{field: "\"ms_graph\".\"configuration\".\"client_id\""},
 	ClientSecret:    whereHelperstring{field: "\"ms_graph\".\"configuration\".\"client_secret\""},
 	TenantID:        whereHelperstring{field: "\"ms_graph\".\"configuration\".\"tenant_id\""},
-	Username:        whereHelpernull_String{field: "\"ms_graph\".\"configuration\".\"username\""},
-	Password:        whereHelpernull_String{field: "\"ms_graph\".\"configuration\".\"password\""},
+	Username:        whereHelperstring{field: "\"ms_graph\".\"configuration\".\"username\""},
+	Password:        whereHelperstring{field: "\"ms_graph\".\"configuration\".\"password\""},
 	RefreshInterval: whereHelperint32{field: "\"ms_graph\".\"configuration\".\"refresh_interval\""},
 	RequestTimeout:  whereHelperint32{field: "\"ms_graph\".\"configuration\".\"request_timeout\""},
 	AssetFilter:     whereHelpernull_JSON{field: "\"ms_graph\".\"configuration\".\"asset_filter\""},
@@ -338,8 +300,8 @@ type configurationL struct{}
 
 var (
 	configurationAllColumns            = []string{"id", "client_id", "client_secret", "tenant_id", "username", "password", "refresh_interval", "request_timeout", "asset_filter", "active", "enable", "project_ids"}
-	configurationColumnsWithoutDefault = []string{"client_id", "client_secret", "tenant_id"}
-	configurationColumnsWithDefault    = []string{"id", "username", "password", "refresh_interval", "request_timeout", "asset_filter", "active", "enable", "project_ids"}
+	configurationColumnsWithoutDefault = []string{"client_id", "client_secret", "tenant_id", "username", "password"}
+	configurationColumnsWithDefault    = []string{"id", "refresh_interval", "request_timeout", "asset_filter", "active", "enable", "project_ids"}
 	configurationPrimaryKeyColumns     = []string{"id"}
 	configurationGeneratedColumns      = []string{}
 )

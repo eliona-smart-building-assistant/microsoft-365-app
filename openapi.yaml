@@ -160,6 +160,7 @@ components:
         clientSecret:
           type: string
           description: Client Secret
+          nullable: true
         tenantId:
           type: string
           description: Tenant ID

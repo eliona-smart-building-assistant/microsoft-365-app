@@ -19,7 +19,7 @@ type Configuration struct {
 	ClientId string `json:"clientId,omitempty"`
 
 	// Client Secret
-	ClientSecret string `json:"clientSecret,omitempty"`
+	ClientSecret *string `json:"clientSecret,omitempty"`
 
 	// Tenant ID
 	TenantId string `json:"tenantId,omitempty"`

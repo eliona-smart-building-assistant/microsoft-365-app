@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	azcore "github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	auth "github.com/microsoft/kiota-authentication-azure-go"
@@ -15,9 +16,9 @@ import (
 )
 
 type GraphHelper struct {
-	deviceCodeCredential *azidentity.DeviceCodeCredential
-	userClient           *msgraphsdk.GraphServiceClient
-	graphUserScopes      []string
+	credential      azcore.TokenCredential
+	userClient      *msgraphsdk.GraphServiceClient
+	graphUserScopes []string
 }
 
 func NewGraphHelper() *GraphHelper {
@@ -25,23 +26,33 @@ func NewGraphHelper() *GraphHelper {
 	return g
 }
 
-func (g *GraphHelper) InitializeGraphForUserAuth(clientId, tenantId string, scopes []string) error {
-	g.graphUserScopes = scopes
-
-	credential, err := azidentity.NewDeviceCodeCredential(&azidentity.DeviceCodeCredentialOptions{
-		ClientID: clientId,
-		TenantID: tenantId,
-		UserPrompt: func(ctx context.Context, message azidentity.DeviceCodeMessage) error {
-			fmt.Println(message.Message)
-			return nil
-		},
-	})
-	if err != nil {
-		return fmt.Errorf("Creating the device code credential: %v", err)
+func (g *GraphHelper) InitializeGraphForUserAuth(clientId, tenantId, clientSecret, username, password string) error {
+	if username != "" {
+		cred, err := azidentity.NewUsernamePasswordCredential(
+			tenantId,
+			clientId,
+			username,
+			password,
+			nil,
+		)
+		if err != nil {
+			return fmt.Errorf("creating the username/password credential: %v", err)
+		}
+		g.credential = cred
+	} else {
+		cred, err := azidentity.NewClientSecretCredential(
+			tenantId,
+			clientId,
+			clientSecret,
+			nil,
+		)
+		if err != nil {
+			return fmt.Errorf("creating the device code credential: %v", err)
+		}
+		g.credential = cred
 	}
-	g.deviceCodeCredential = credential
 
-	authProvider, err := auth.NewAzureIdentityAuthenticationProviderWithScopes(credential, g.graphUserScopes)
+	authProvider, err := auth.NewAzureIdentityAuthenticationProviderWithScopes(g.credential, g.graphUserScopes)
 	if err != nil {
 		return fmt.Errorf("Creating an auth provider: %v", err)
 	}
@@ -58,7 +69,7 @@ func (g *GraphHelper) InitializeGraphForUserAuth(clientId, tenantId string, scop
 }
 
 func (g *GraphHelper) GetUserToken() (*string, error) {
-	token, err := g.deviceCodeCredential.GetToken(context.Background(), policy.TokenRequestOptions{
+	token, err := g.credential.GetToken(context.Background(), policy.TokenRequestOptions{
 		Scopes: g.graphUserScopes,
 	})
 	if err != nil {

@@ -77,10 +77,16 @@ func DeleteConfig(ctx context.Context, configID int64) error {
 func dbConfigFromApiConfig(apiConfig apiserver.Configuration) (dbConfig appdb.Configuration, err error) {
 	dbConfig.ID = null.Int64FromPtr(apiConfig.Id).Int64
 	dbConfig.ClientID = apiConfig.ClientId
-	dbConfig.ClientSecret = apiConfig.ClientSecret
+	if apiConfig.ClientSecret != nil {
+		dbConfig.ClientSecret = *apiConfig.ClientSecret
+	}
 	dbConfig.TenantID = apiConfig.TenantId
-	dbConfig.Username = null.StringFromPtr(apiConfig.Username)
-	dbConfig.Password = null.StringFromPtr(apiConfig.Password)
+	if apiConfig.Username != nil {
+		dbConfig.Username = *apiConfig.Username
+	}
+	if apiConfig.Password != nil {
+		dbConfig.Password = *apiConfig.Password
+	}
 	dbConfig.Enable = null.BoolFromPtr(apiConfig.Enable)
 	dbConfig.RefreshInterval = apiConfig.RefreshInterval
 	if apiConfig.RequestTimeout != nil {
@@ -102,10 +108,10 @@ func dbConfigFromApiConfig(apiConfig apiserver.Configuration) (dbConfig appdb.Co
 func apiConfigFromDbConfig(dbConfig *appdb.Configuration) (apiConfig apiserver.Configuration, err error) {
 	apiConfig.Id = &dbConfig.ID
 	apiConfig.ClientId = dbConfig.ClientID
-	apiConfig.ClientSecret = dbConfig.ClientSecret
+	apiConfig.ClientSecret = &dbConfig.ClientSecret
 	apiConfig.TenantId = dbConfig.TenantID
-	apiConfig.Username = dbConfig.Username.Ptr()
-	apiConfig.Password = dbConfig.Password.Ptr()
+	apiConfig.Username = &dbConfig.Username
+	apiConfig.Password = &dbConfig.Password
 	apiConfig.Enable = dbConfig.Enable.Ptr()
 	apiConfig.RefreshInterval = dbConfig.RefreshInterval
 	apiConfig.RequestTimeout = &dbConfig.RequestTimeout
