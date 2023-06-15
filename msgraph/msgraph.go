@@ -135,34 +135,142 @@ func (g *GraphHelper) SendMail(subject *string, body *string, recipient *string)
 	return g.userClient.Me().SendMail().Post(context.Background(), sendMailBody, nil)
 }
 
-func (g *GraphHelper) GetRooms() error {
+type PhysicalAddress struct {
+	City            *string `eliona:"city"`
+	CountryOrRegion *string `eliona:"country_or_region"`
+	PostalCode      *string `eliona:"postal_code"`
+	State           *string `eliona:"state"`
+	Street          *string `eliona:"street"`
+}
+
+type GeoCoordinates struct {
+	Accuracy         *float64 `eliona:"accuracy"`
+	Altitude         *float64 `eliona:"altitude"`
+	AltitudeAccuracy *float64 `eliona:"altitude_accuracy"`
+	Latitude         *float64 `eliona:"latitude"`
+	Longitude        *float64 `eliona:"longitude"`
+}
+
+type Room struct {
+	Address                PhysicalAddress `eliona:"address"`
+	DisplayName            *string         `eliona:"display_name"`
+	GeoCoordinates         GeoCoordinates  `eliona:"geo_coordinates"`
+	Phone                  *string         `eliona:"phone"`
+	AudioDeviceName        *string         `eliona:"audio_device_name"`
+	BookingType            BookingType     `eliona:"booking_type"`
+	Building               *string         `eliona:"building"`
+	Capacity               *int32          `eliona:"capacity"`
+	DisplayDeviceName      *string         `eliona:"display_device_name"`
+	EmailAddress           *string         `eliona:"email_address"`
+	FloorLabel             *string         `eliona:"floor_label"`
+	FloorNumber            *int32          `eliona:"floor_number"`
+	IsWheelChairAccessible *bool           `eliona:"is_wheel_chair_accessible"`
+	Label                  *string         `eliona:"label"`
+	Nickname               *string         `eliona:"nickname"`
+	Tags                   []string        `eliona:"tags"`
+	VideoDeviceName        *string         `eliona:"video_device_name"`
+}
+
+type BookingType int
+
+const (
+	UNKNOWN_BOOKINGTYPE BookingType = iota
+	STANDARD_BOOKINGTYPE
+	RESERVED_BOOKINGTYPE
+)
+
+func (i BookingType) String() string {
+	return []string{"unknown", "standard", "reserved"}[i]
+}
+
+func mapBookingType(bt *models.BookingType) BookingType {
+	if bt == nil {
+		return UNKNOWN_BOOKINGTYPE
+	}
+
+	switch *bt {
+	case models.STANDARD_BOOKINGTYPE:
+		return STANDARD_BOOKINGTYPE
+	case models.RESERVED_BOOKINGTYPE:
+		return RESERVED_BOOKINGTYPE
+	default:
+		return UNKNOWN_BOOKINGTYPE
+	}
+}
+
+func (g *GraphHelper) GetRooms() ([]Room, error) {
 	r, err := g.userClient.Places().GraphRoom().Get(context.Background(), nil)
 	if err != nil {
 		printOdataError(err)
-		return fmt.Errorf("querying API: %+v", err)
+		return nil, fmt.Errorf("querying API: %+v", err)
 	}
 
 	pageIterator, err := msgraphcore.NewPageIterator[*models.Room](
 		r, g.userClient.GetAdapter(), models.CreateRoomFromDiscriminatorValue,
 	)
 	if err != nil {
-		return fmt.Errorf("getting iterator: %v", err)
+		return nil, fmt.Errorf("getting iterator: %v", err)
 	}
 
-	err = pageIterator.Iterate(context.Background(), func(room *models.Room) bool {
-		fmt.Printf("%+v\n", *room)
-		fmt.Printf("%v\n", *room.GetId())
-		fmt.Printf("%v\n", *room.GetDisplayName())
+	var rooms []Room
+	if err := pageIterator.Iterate(context.Background(), func(msroom *models.Room) bool {
+		if msroom == nil {
+			return false
+		}
+		room := convertToRoom(*msroom)
+		rooms = append(rooms, room)
+		fmt.Printf("%+v:\n", room)
 		// Return true to continue the iteration
 		return true
-	})
-	if err != nil {
-		return fmt.Errorf("iterating: %v", err)
+	}); err != nil {
+		return nil, fmt.Errorf("iterating: %v", err)
 	}
 
-	fmt.Println("succeeeeeessss!")
-	fmt.Printf("%+v\n", r)
-	return nil
+	return rooms, nil
+}
+
+func convertToRoom(r models.Room) Room {
+	address := r.GetAddress()
+	geoCoordinates := r.GetGeoCoordinates()
+
+	room := Room{
+		DisplayName:            r.GetDisplayName(),
+		Phone:                  r.GetPhone(),
+		AudioDeviceName:        r.GetAudioDeviceName(),
+		BookingType:            mapBookingType(r.GetBookingType()),
+		Building:               r.GetBuilding(),
+		Capacity:               r.GetCapacity(),
+		DisplayDeviceName:      r.GetDisplayDeviceName(),
+		EmailAddress:           r.GetEmailAddress(),
+		FloorLabel:             r.GetFloorLabel(),
+		FloorNumber:            r.GetFloorNumber(),
+		IsWheelChairAccessible: r.GetIsWheelChairAccessible(),
+		Label:                  r.GetLabel(),
+		Nickname:               r.GetNickname(),
+		Tags:                   r.GetTags(), // assuming it always returns a non-nil slice
+		VideoDeviceName:        r.GetVideoDeviceName(),
+	}
+
+	if geoCoordinates != nil {
+		room.GeoCoordinates = GeoCoordinates{
+			Accuracy:         geoCoordinates.GetAccuracy(),
+			Altitude:         geoCoordinates.GetAltitude(),
+			AltitudeAccuracy: geoCoordinates.GetAltitudeAccuracy(),
+			Latitude:         geoCoordinates.GetLatitude(),
+			Longitude:        geoCoordinates.GetLongitude(),
+		}
+	}
+
+	if address != nil {
+		room.Address = PhysicalAddress{
+			City:            address.GetCity(),
+			CountryOrRegion: address.GetCountryOrRegion(),
+			PostalCode:      address.GetPostalCode(),
+			State:           address.GetState(),
+			Street:          address.GetStreet(),
+		}
+	}
+	return room
 }
 
 func printOdataError(err error) {

@@ -88,12 +88,12 @@ func collectRooms(config apiserver.Configuration) error {
 		return err
 	}
 
-	err := graph.GetRooms()
+	rooms, err := graph.GetRooms()
 	if err != nil {
 		log.Error("ms-graph", "getting rooms: %v", err)
 		return err
 	}
-	fmt.Printf("")
+	fmt.Printf("got %v rooms.\n", len(rooms))
 	// if err := eliona.CreateRoomsAssetsIfNecessary(config, rooms); err != nil {
 	// 	log.Error("eliona", "creating location assets: %v", err)
 	// 	return err
