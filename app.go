@@ -89,7 +89,7 @@ func collectRooms(config apiserver.Configuration) error {
 		return err
 	}
 
-	rooms, err := graph.GetRooms()
+	rooms, err := graph.GetRooms(config)
 	if err != nil {
 		log.Error("ms-graph", "getting rooms: %v", err)
 		return err
