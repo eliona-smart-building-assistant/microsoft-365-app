@@ -1,5 +1,176 @@
 {
-	"attributes": [],
+	"attributes": [
+		{
+			"enable": true,
+			"name": "address",
+			"subtype": "info",
+			"type": "device-info",
+			"translation": {
+				"de": "Adresse",
+				"en": "Address"
+			}
+		},
+		{
+			"enable": true,
+			"name": "display_name",
+			"subtype": "info",
+			"type": "device-info",
+			"translation": {
+				"de": "Anzeigename",
+				"en": "Display Name"
+			}
+		},
+		{
+			"enable": true,
+			"name": "nickname",
+			"subtype": "info",
+			"type": "device-info",
+			"translation": {
+				"de": "Spitzname",
+				"en": "Nickname"
+			}
+		},
+		{
+			"enable": true,
+			"name": "label",
+			"subtype": "info",
+			"type": "device-info",
+			"translation": {
+				"de": "Etikett",
+				"en": "Label"
+			}
+		},
+		{
+			"enable": true,
+			"name": "geo_coordinates",
+			"subtype": "info",
+			"type": "device-info",
+			"translation": {
+				"de": "Geokoordinaten",
+				"en": "Geo Coordinates"
+			}
+		},
+		{
+			"enable": true,
+			"name": "phone",
+			"subtype": "info",
+			"type": "device-info",
+			"translation": {
+				"de": "Telefon",
+				"en": "Phone"
+			}
+		},
+		{
+			"enable": true,
+			"name": "email_address",
+			"subtype": "info",
+			"type": "device-info",
+			"translation": {
+				"de": "E-Mail-Adresse",
+				"en": "Email Address"
+			}
+		},
+		{
+			"enable": true,
+			"name": "booking_type",
+			"subtype": "info",
+			"type": "device-info",
+			"translation": {
+				"de": "Buchungstyp",
+				"en": "Booking Type"
+			}
+		},
+		{
+			"enable": true,
+			"name": "building",
+			"subtype": "info",
+			"type": "device-info",
+			"translation": {
+				"de": "Gebäude",
+				"en": "Building"
+			}
+		},
+		{
+			"enable": true,
+			"name": "capacity",
+			"subtype": "info",
+			"type": "device-info",
+			"translation": {
+				"de": "Kapazität",
+				"en": "Capacity"
+			}
+		},
+		{
+			"enable": true,
+			"name": "floor_label",
+			"subtype": "info",
+			"type": "device-info",
+			"translation": {
+				"de": "Stockwerkbezeichnung",
+				"en": "Floor Label"
+			}
+		},
+		{
+			"enable": true,
+			"name": "floor_number",
+			"subtype": "info",
+			"type": "device-info",
+			"translation": {
+				"de": "Stockwerknummer",
+				"en": "Floor Number"
+			}
+		},
+		{
+			"enable": true,
+			"name": "is_wheel_chair_accessible",
+			"subtype": "info",
+			"type": "device-info",
+			"translation": {
+				"de": "Ist rollstuhlgängig",
+				"en": "Is Wheelchair Accessible"
+			}
+		},
+		{
+			"enable": true,
+			"name": "tags",
+			"subtype": "info",
+			"type": "device-info",
+			"translation": {
+				"de": "Schlagwörter",
+				"en": "Tags"
+			}
+		},
+		{
+			"enable": true,
+			"name": "display_device_name",
+			"subtype": "info",
+			"type": "device-info",
+			"translation": {
+				"de": "Anzeigegerätename",
+				"en": "Display Device Name"
+			}
+		},
+		{
+			"enable": true,
+			"name": "audio_device_name",
+			"subtype": "info",
+			"type": "device-info",
+			"translation": {
+				"de": "Audio-Gerätename",
+				"en": "Audio Device Name"
+			}
+		},
+		{
+			"enable": true,
+			"name": "video_device_name",
+			"subtype": "info",
+			"type": "device-info",
+			"translation": {
+				"de": "Video-Gerätename",
+				"en": "Video Device Name"
+			}
+		}
+	],
 	"custom": true,
 	"icon": "closable",
 	"name": "ms_graph_room",

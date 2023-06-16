@@ -136,39 +136,39 @@ func (g *GraphHelper) SendMail(subject *string, body *string, recipient *string)
 }
 
 type PhysicalAddress struct {
-	City            *string `eliona:"city"`
-	CountryOrRegion *string `eliona:"country_or_region"`
-	PostalCode      *string `eliona:"postal_code"`
-	State           *string `eliona:"state"`
-	Street          *string `eliona:"street"`
+	City            *string
+	CountryOrRegion *string
+	PostalCode      *string
+	State           *string
+	Street          *string
 }
 
 type GeoCoordinates struct {
-	Accuracy         *float64 `eliona:"accuracy"`
-	Altitude         *float64 `eliona:"altitude"`
-	AltitudeAccuracy *float64 `eliona:"altitude_accuracy"`
-	Latitude         *float64 `eliona:"latitude"`
-	Longitude        *float64 `eliona:"longitude"`
+	Accuracy         *float64
+	Altitude         *float64
+	AltitudeAccuracy *float64
+	Latitude         *float64
+	Longitude        *float64
 }
 
 type Room struct {
-	Address                PhysicalAddress `eliona:"address"`
-	DisplayName            *string         `eliona:"display_name"`
-	GeoCoordinates         GeoCoordinates  `eliona:"geo_coordinates"`
-	Phone                  *string         `eliona:"phone"`
-	AudioDeviceName        *string         `eliona:"audio_device_name"`
-	BookingType            BookingType     `eliona:"booking_type"`
-	Building               *string         `eliona:"building"`
-	Capacity               *int32          `eliona:"capacity"`
-	DisplayDeviceName      *string         `eliona:"display_device_name"`
-	EmailAddress           *string         `eliona:"email_address"`
-	FloorLabel             *string         `eliona:"floor_label"`
-	FloorNumber            *int32          `eliona:"floor_number"`
-	IsWheelChairAccessible *bool           `eliona:"is_wheel_chair_accessible"`
-	Label                  *string         `eliona:"label"`
-	Nickname               *string         `eliona:"nickname"`
-	Tags                   []string        `eliona:"tags"`
-	VideoDeviceName        *string         `eliona:"video_device_name"`
+	Address                PhysicalAddress `eliona:"address" subtype:"info"`
+	DisplayName            *string         `eliona:"display_name" subtype:"info"`
+	Nickname               *string         `eliona:"nickname" subtype:"info"`
+	Label                  *string         `eliona:"label" subtype:"info"`
+	GeoCoordinates         GeoCoordinates  `eliona:"geo_coordinates" subtype:"info"`
+	Phone                  *string         `eliona:"phone" subtype:"info"`
+	EmailAddress           *string         `eliona:"email_address" subtype:"info"`
+	BookingType            BookingType     `eliona:"booking_type" subtype:"info"`
+	Building               *string         `eliona:"building" subtype:"info"`
+	Capacity               *int32          `eliona:"capacity" subtype:"info"`
+	FloorLabel             *string         `eliona:"floor_label" subtype:"info"`
+	FloorNumber            *int32          `eliona:"floor_number" subtype:"info"`
+	IsWheelChairAccessible *bool           `eliona:"is_wheel_chair_accessible" subtype:"info"`
+	Tags                   []string        `eliona:"tags" subtype:"info"`
+	DisplayDeviceName      *string         `eliona:"display_device_name" subtype:"info"`
+	AudioDeviceName        *string         `eliona:"audio_device_name" subtype:"info"`
+	VideoDeviceName        *string         `eliona:"video_device_name" subtype:"info"`
 }
 
 type BookingType int
