@@ -22,19 +22,19 @@ import (
 	"github.com/volatiletech/strmangle"
 )
 
-// Room is an object representing the database table.
-type Room struct {
+// Asset is an object representing the database table.
+type Asset struct {
 	ID              int64      `boil:"id" json:"id" toml:"id" yaml:"id"`
 	ConfigurationID int64      `boil:"configuration_id" json:"configuration_id" toml:"configuration_id" yaml:"configuration_id"`
 	ProjectID       string     `boil:"project_id" json:"project_id" toml:"project_id" yaml:"project_id"`
 	GlobalAssetID   string     `boil:"global_asset_id" json:"global_asset_id" toml:"global_asset_id" yaml:"global_asset_id"`
 	AssetID         null.Int32 `boil:"asset_id" json:"asset_id,omitempty" toml:"asset_id" yaml:"asset_id,omitempty"`
 
-	R *roomR `boil:"-" json:"-" toml:"-" yaml:"-"`
-	L roomL  `boil:"-" json:"-" toml:"-" yaml:"-"`
+	R *assetR `boil:"-" json:"-" toml:"-" yaml:"-"`
+	L assetL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
-var RoomColumns = struct {
+var AssetColumns = struct {
 	ID              string
 	ConfigurationID string
 	ProjectID       string
@@ -48,21 +48,67 @@ var RoomColumns = struct {
 	AssetID:         "asset_id",
 }
 
-var RoomTableColumns = struct {
+var AssetTableColumns = struct {
 	ID              string
 	ConfigurationID string
 	ProjectID       string
 	GlobalAssetID   string
 	AssetID         string
 }{
-	ID:              "room.id",
-	ConfigurationID: "room.configuration_id",
-	ProjectID:       "room.project_id",
-	GlobalAssetID:   "room.global_asset_id",
-	AssetID:         "room.asset_id",
+	ID:              "asset.id",
+	ConfigurationID: "asset.configuration_id",
+	ProjectID:       "asset.project_id",
+	GlobalAssetID:   "asset.global_asset_id",
+	AssetID:         "asset.asset_id",
 }
 
 // Generated where
+
+type whereHelperint64 struct{ field string }
+
+func (w whereHelperint64) EQ(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperint64) NEQ(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperint64) LT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperint64) LTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperint64) GT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperint64) GTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperint64) IN(slice []int64) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperint64) NIN(slice []int64) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
+
+type whereHelperstring struct{ field string }
+
+func (w whereHelperstring) EQ(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperstring) NEQ(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperstring) LT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperstring) LTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperstring) GT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperstring) GTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperstring) IN(slice []string) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
 
 type whereHelpernull_Int32 struct{ field string }
 
@@ -102,78 +148,78 @@ func (w whereHelpernull_Int32) NIN(slice []int32) qm.QueryMod {
 func (w whereHelpernull_Int32) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
 func (w whereHelpernull_Int32) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
-var RoomWhere = struct {
+var AssetWhere = struct {
 	ID              whereHelperint64
 	ConfigurationID whereHelperint64
 	ProjectID       whereHelperstring
 	GlobalAssetID   whereHelperstring
 	AssetID         whereHelpernull_Int32
 }{
-	ID:              whereHelperint64{field: "\"ms_graph\".\"room\".\"id\""},
-	ConfigurationID: whereHelperint64{field: "\"ms_graph\".\"room\".\"configuration_id\""},
-	ProjectID:       whereHelperstring{field: "\"ms_graph\".\"room\".\"project_id\""},
-	GlobalAssetID:   whereHelperstring{field: "\"ms_graph\".\"room\".\"global_asset_id\""},
-	AssetID:         whereHelpernull_Int32{field: "\"ms_graph\".\"room\".\"asset_id\""},
+	ID:              whereHelperint64{field: "\"ms_graph\".\"asset\".\"id\""},
+	ConfigurationID: whereHelperint64{field: "\"ms_graph\".\"asset\".\"configuration_id\""},
+	ProjectID:       whereHelperstring{field: "\"ms_graph\".\"asset\".\"project_id\""},
+	GlobalAssetID:   whereHelperstring{field: "\"ms_graph\".\"asset\".\"global_asset_id\""},
+	AssetID:         whereHelpernull_Int32{field: "\"ms_graph\".\"asset\".\"asset_id\""},
 }
 
-// RoomRels is where relationship names are stored.
-var RoomRels = struct {
+// AssetRels is where relationship names are stored.
+var AssetRels = struct {
 	Configuration string
 }{
 	Configuration: "Configuration",
 }
 
-// roomR is where relationships are stored.
-type roomR struct {
+// assetR is where relationships are stored.
+type assetR struct {
 	Configuration *Configuration `boil:"Configuration" json:"Configuration" toml:"Configuration" yaml:"Configuration"`
 }
 
 // NewStruct creates a new relationship struct
-func (*roomR) NewStruct() *roomR {
-	return &roomR{}
+func (*assetR) NewStruct() *assetR {
+	return &assetR{}
 }
 
-func (r *roomR) GetConfiguration() *Configuration {
+func (r *assetR) GetConfiguration() *Configuration {
 	if r == nil {
 		return nil
 	}
 	return r.Configuration
 }
 
-// roomL is where Load methods for each relationship are stored.
-type roomL struct{}
+// assetL is where Load methods for each relationship are stored.
+type assetL struct{}
 
 var (
-	roomAllColumns            = []string{"id", "configuration_id", "project_id", "global_asset_id", "asset_id"}
-	roomColumnsWithoutDefault = []string{"project_id", "global_asset_id"}
-	roomColumnsWithDefault    = []string{"id", "configuration_id", "asset_id"}
-	roomPrimaryKeyColumns     = []string{"id"}
-	roomGeneratedColumns      = []string{}
+	assetAllColumns            = []string{"id", "configuration_id", "project_id", "global_asset_id", "asset_id"}
+	assetColumnsWithoutDefault = []string{"project_id", "global_asset_id"}
+	assetColumnsWithDefault    = []string{"id", "configuration_id", "asset_id"}
+	assetPrimaryKeyColumns     = []string{"id"}
+	assetGeneratedColumns      = []string{}
 )
 
 type (
-	// RoomSlice is an alias for a slice of pointers to Room.
-	// This should almost always be used instead of []Room.
-	RoomSlice []*Room
-	// RoomHook is the signature for custom Room hook methods
-	RoomHook func(context.Context, boil.ContextExecutor, *Room) error
+	// AssetSlice is an alias for a slice of pointers to Asset.
+	// This should almost always be used instead of []Asset.
+	AssetSlice []*Asset
+	// AssetHook is the signature for custom Asset hook methods
+	AssetHook func(context.Context, boil.ContextExecutor, *Asset) error
 
-	roomQuery struct {
+	assetQuery struct {
 		*queries.Query
 	}
 )
 
 // Cache for insert, update and upsert
 var (
-	roomType                 = reflect.TypeOf(&Room{})
-	roomMapping              = queries.MakeStructMapping(roomType)
-	roomPrimaryKeyMapping, _ = queries.BindMapping(roomType, roomMapping, roomPrimaryKeyColumns)
-	roomInsertCacheMut       sync.RWMutex
-	roomInsertCache          = make(map[string]insertCache)
-	roomUpdateCacheMut       sync.RWMutex
-	roomUpdateCache          = make(map[string]updateCache)
-	roomUpsertCacheMut       sync.RWMutex
-	roomUpsertCache          = make(map[string]insertCache)
+	assetType                 = reflect.TypeOf(&Asset{})
+	assetMapping              = queries.MakeStructMapping(assetType)
+	assetPrimaryKeyMapping, _ = queries.BindMapping(assetType, assetMapping, assetPrimaryKeyColumns)
+	assetInsertCacheMut       sync.RWMutex
+	assetInsertCache          = make(map[string]insertCache)
+	assetUpdateCacheMut       sync.RWMutex
+	assetUpdateCache          = make(map[string]updateCache)
+	assetUpsertCacheMut       sync.RWMutex
+	assetUpsertCache          = make(map[string]insertCache)
 )
 
 var (
@@ -184,27 +230,27 @@ var (
 	_ = qmhelper.Where
 )
 
-var roomAfterSelectHooks []RoomHook
+var assetAfterSelectHooks []AssetHook
 
-var roomBeforeInsertHooks []RoomHook
-var roomAfterInsertHooks []RoomHook
+var assetBeforeInsertHooks []AssetHook
+var assetAfterInsertHooks []AssetHook
 
-var roomBeforeUpdateHooks []RoomHook
-var roomAfterUpdateHooks []RoomHook
+var assetBeforeUpdateHooks []AssetHook
+var assetAfterUpdateHooks []AssetHook
 
-var roomBeforeDeleteHooks []RoomHook
-var roomAfterDeleteHooks []RoomHook
+var assetBeforeDeleteHooks []AssetHook
+var assetAfterDeleteHooks []AssetHook
 
-var roomBeforeUpsertHooks []RoomHook
-var roomAfterUpsertHooks []RoomHook
+var assetBeforeUpsertHooks []AssetHook
+var assetAfterUpsertHooks []AssetHook
 
 // doAfterSelectHooks executes all "after Select" hooks.
-func (o *Room) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Asset) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range roomAfterSelectHooks {
+	for _, hook := range assetAfterSelectHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -214,12 +260,12 @@ func (o *Room) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor
 }
 
 // doBeforeInsertHooks executes all "before insert" hooks.
-func (o *Room) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Asset) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range roomBeforeInsertHooks {
+	for _, hook := range assetBeforeInsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -229,12 +275,12 @@ func (o *Room) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecuto
 }
 
 // doAfterInsertHooks executes all "after Insert" hooks.
-func (o *Room) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Asset) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range roomAfterInsertHooks {
+	for _, hook := range assetAfterInsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -244,12 +290,12 @@ func (o *Room) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor
 }
 
 // doBeforeUpdateHooks executes all "before Update" hooks.
-func (o *Room) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Asset) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range roomBeforeUpdateHooks {
+	for _, hook := range assetBeforeUpdateHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -259,12 +305,12 @@ func (o *Room) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecuto
 }
 
 // doAfterUpdateHooks executes all "after Update" hooks.
-func (o *Room) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Asset) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range roomAfterUpdateHooks {
+	for _, hook := range assetAfterUpdateHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -274,12 +320,12 @@ func (o *Room) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor
 }
 
 // doBeforeDeleteHooks executes all "before Delete" hooks.
-func (o *Room) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Asset) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range roomBeforeDeleteHooks {
+	for _, hook := range assetBeforeDeleteHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -289,12 +335,12 @@ func (o *Room) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecuto
 }
 
 // doAfterDeleteHooks executes all "after Delete" hooks.
-func (o *Room) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Asset) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range roomAfterDeleteHooks {
+	for _, hook := range assetAfterDeleteHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -304,12 +350,12 @@ func (o *Room) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor
 }
 
 // doBeforeUpsertHooks executes all "before Upsert" hooks.
-func (o *Room) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Asset) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range roomBeforeUpsertHooks {
+	for _, hook := range assetBeforeUpsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -319,12 +365,12 @@ func (o *Room) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecuto
 }
 
 // doAfterUpsertHooks executes all "after Upsert" hooks.
-func (o *Room) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Asset) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range roomAfterUpsertHooks {
+	for _, hook := range assetAfterUpsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -333,38 +379,38 @@ func (o *Room) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor
 	return nil
 }
 
-// AddRoomHook registers your hook function for all future operations.
-func AddRoomHook(hookPoint boil.HookPoint, roomHook RoomHook) {
+// AddAssetHook registers your hook function for all future operations.
+func AddAssetHook(hookPoint boil.HookPoint, assetHook AssetHook) {
 	switch hookPoint {
 	case boil.AfterSelectHook:
-		roomAfterSelectHooks = append(roomAfterSelectHooks, roomHook)
+		assetAfterSelectHooks = append(assetAfterSelectHooks, assetHook)
 	case boil.BeforeInsertHook:
-		roomBeforeInsertHooks = append(roomBeforeInsertHooks, roomHook)
+		assetBeforeInsertHooks = append(assetBeforeInsertHooks, assetHook)
 	case boil.AfterInsertHook:
-		roomAfterInsertHooks = append(roomAfterInsertHooks, roomHook)
+		assetAfterInsertHooks = append(assetAfterInsertHooks, assetHook)
 	case boil.BeforeUpdateHook:
-		roomBeforeUpdateHooks = append(roomBeforeUpdateHooks, roomHook)
+		assetBeforeUpdateHooks = append(assetBeforeUpdateHooks, assetHook)
 	case boil.AfterUpdateHook:
-		roomAfterUpdateHooks = append(roomAfterUpdateHooks, roomHook)
+		assetAfterUpdateHooks = append(assetAfterUpdateHooks, assetHook)
 	case boil.BeforeDeleteHook:
-		roomBeforeDeleteHooks = append(roomBeforeDeleteHooks, roomHook)
+		assetBeforeDeleteHooks = append(assetBeforeDeleteHooks, assetHook)
 	case boil.AfterDeleteHook:
-		roomAfterDeleteHooks = append(roomAfterDeleteHooks, roomHook)
+		assetAfterDeleteHooks = append(assetAfterDeleteHooks, assetHook)
 	case boil.BeforeUpsertHook:
-		roomBeforeUpsertHooks = append(roomBeforeUpsertHooks, roomHook)
+		assetBeforeUpsertHooks = append(assetBeforeUpsertHooks, assetHook)
 	case boil.AfterUpsertHook:
-		roomAfterUpsertHooks = append(roomAfterUpsertHooks, roomHook)
+		assetAfterUpsertHooks = append(assetAfterUpsertHooks, assetHook)
 	}
 }
 
-// OneG returns a single room record from the query using the global executor.
-func (q roomQuery) OneG(ctx context.Context) (*Room, error) {
+// OneG returns a single asset record from the query using the global executor.
+func (q assetQuery) OneG(ctx context.Context) (*Asset, error) {
 	return q.One(ctx, boil.GetContextDB())
 }
 
-// One returns a single room record from the query.
-func (q roomQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Room, error) {
-	o := &Room{}
+// One returns a single asset record from the query.
+func (q assetQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Asset, error) {
+	o := &Asset{}
 
 	queries.SetLimit(q.Query, 1)
 
@@ -373,7 +419,7 @@ func (q roomQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Room, e
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "appdb: failed to execute a one query for room")
+		return nil, errors.Wrap(err, "appdb: failed to execute a one query for asset")
 	}
 
 	if err := o.doAfterSelectHooks(ctx, exec); err != nil {
@@ -383,21 +429,21 @@ func (q roomQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Room, e
 	return o, nil
 }
 
-// AllG returns all Room records from the query using the global executor.
-func (q roomQuery) AllG(ctx context.Context) (RoomSlice, error) {
+// AllG returns all Asset records from the query using the global executor.
+func (q assetQuery) AllG(ctx context.Context) (AssetSlice, error) {
 	return q.All(ctx, boil.GetContextDB())
 }
 
-// All returns all Room records from the query.
-func (q roomQuery) All(ctx context.Context, exec boil.ContextExecutor) (RoomSlice, error) {
-	var o []*Room
+// All returns all Asset records from the query.
+func (q assetQuery) All(ctx context.Context, exec boil.ContextExecutor) (AssetSlice, error) {
+	var o []*Asset
 
 	err := q.Bind(ctx, exec, &o)
 	if err != nil {
-		return nil, errors.Wrap(err, "appdb: failed to assign all query results to Room slice")
+		return nil, errors.Wrap(err, "appdb: failed to assign all query results to Asset slice")
 	}
 
-	if len(roomAfterSelectHooks) != 0 {
+	if len(assetAfterSelectHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doAfterSelectHooks(ctx, exec); err != nil {
 				return o, err
@@ -408,13 +454,13 @@ func (q roomQuery) All(ctx context.Context, exec boil.ContextExecutor) (RoomSlic
 	return o, nil
 }
 
-// CountG returns the count of all Room records in the query using the global executor
-func (q roomQuery) CountG(ctx context.Context) (int64, error) {
+// CountG returns the count of all Asset records in the query using the global executor
+func (q assetQuery) CountG(ctx context.Context) (int64, error) {
 	return q.Count(ctx, boil.GetContextDB())
 }
 
-// Count returns the count of all Room records in the query.
-func (q roomQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+// Count returns the count of all Asset records in the query.
+func (q assetQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -422,19 +468,19 @@ func (q roomQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64,
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return 0, errors.Wrap(err, "appdb: failed to count room rows")
+		return 0, errors.Wrap(err, "appdb: failed to count asset rows")
 	}
 
 	return count, nil
 }
 
 // ExistsG checks if the row exists in the table using the global executor.
-func (q roomQuery) ExistsG(ctx context.Context) (bool, error) {
+func (q assetQuery) ExistsG(ctx context.Context) (bool, error) {
 	return q.Exists(ctx, boil.GetContextDB())
 }
 
 // Exists checks if the row exists in the table.
-func (q roomQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
+func (q assetQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -443,14 +489,14 @@ func (q roomQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool,
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return false, errors.Wrap(err, "appdb: failed to check if room exists")
+		return false, errors.Wrap(err, "appdb: failed to check if asset exists")
 	}
 
 	return count > 0, nil
 }
 
 // Configuration pointed to by the foreign key.
-func (o *Room) Configuration(mods ...qm.QueryMod) configurationQuery {
+func (o *Asset) Configuration(mods ...qm.QueryMod) configurationQuery {
 	queryMods := []qm.QueryMod{
 		qm.Where("\"id\" = ?", o.ConfigurationID),
 	}
@@ -462,28 +508,28 @@ func (o *Room) Configuration(mods ...qm.QueryMod) configurationQuery {
 
 // LoadConfiguration allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
-func (roomL) LoadConfiguration(ctx context.Context, e boil.ContextExecutor, singular bool, maybeRoom interface{}, mods queries.Applicator) error {
-	var slice []*Room
-	var object *Room
+func (assetL) LoadConfiguration(ctx context.Context, e boil.ContextExecutor, singular bool, maybeAsset interface{}, mods queries.Applicator) error {
+	var slice []*Asset
+	var object *Asset
 
 	if singular {
 		var ok bool
-		object, ok = maybeRoom.(*Room)
+		object, ok = maybeAsset.(*Asset)
 		if !ok {
-			object = new(Room)
-			ok = queries.SetFromEmbeddedStruct(&object, &maybeRoom)
+			object = new(Asset)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeAsset)
 			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeRoom))
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeAsset))
 			}
 		}
 	} else {
-		s, ok := maybeRoom.(*[]*Room)
+		s, ok := maybeAsset.(*[]*Asset)
 		if ok {
 			slice = *s
 		} else {
-			ok = queries.SetFromEmbeddedStruct(&slice, maybeRoom)
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeAsset)
 			if !ok {
-				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeRoom))
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeAsset))
 			}
 		}
 	}
@@ -491,7 +537,7 @@ func (roomL) LoadConfiguration(ctx context.Context, e boil.ContextExecutor, sing
 	args := make([]interface{}, 0, 1)
 	if singular {
 		if object.R == nil {
-			object.R = &roomR{}
+			object.R = &assetR{}
 		}
 		args = append(args, object.ConfigurationID)
 
@@ -499,7 +545,7 @@ func (roomL) LoadConfiguration(ctx context.Context, e boil.ContextExecutor, sing
 	Outer:
 		for _, obj := range slice {
 			if obj.R == nil {
-				obj.R = &roomR{}
+				obj.R = &assetR{}
 			}
 
 			for _, a := range args {
@@ -560,7 +606,7 @@ func (roomL) LoadConfiguration(ctx context.Context, e boil.ContextExecutor, sing
 		if foreign.R == nil {
 			foreign.R = &configurationR{}
 		}
-		foreign.R.Rooms = append(foreign.R.Rooms, object)
+		foreign.R.Assets = append(foreign.R.Assets, object)
 		return nil
 	}
 
@@ -571,7 +617,7 @@ func (roomL) LoadConfiguration(ctx context.Context, e boil.ContextExecutor, sing
 				if foreign.R == nil {
 					foreign.R = &configurationR{}
 				}
-				foreign.R.Rooms = append(foreign.R.Rooms, local)
+				foreign.R.Assets = append(foreign.R.Assets, local)
 				break
 			}
 		}
@@ -580,18 +626,18 @@ func (roomL) LoadConfiguration(ctx context.Context, e boil.ContextExecutor, sing
 	return nil
 }
 
-// SetConfigurationG of the room to the related item.
+// SetConfigurationG of the asset to the related item.
 // Sets o.R.Configuration to related.
-// Adds o to related.R.Rooms.
+// Adds o to related.R.Assets.
 // Uses the global database handle.
-func (o *Room) SetConfigurationG(ctx context.Context, insert bool, related *Configuration) error {
+func (o *Asset) SetConfigurationG(ctx context.Context, insert bool, related *Configuration) error {
 	return o.SetConfiguration(ctx, boil.GetContextDB(), insert, related)
 }
 
-// SetConfiguration of the room to the related item.
+// SetConfiguration of the asset to the related item.
 // Sets o.R.Configuration to related.
-// Adds o to related.R.Rooms.
-func (o *Room) SetConfiguration(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Configuration) error {
+// Adds o to related.R.Assets.
+func (o *Asset) SetConfiguration(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Configuration) error {
 	var err error
 	if insert {
 		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
@@ -600,9 +646,9 @@ func (o *Room) SetConfiguration(ctx context.Context, exec boil.ContextExecutor, 
 	}
 
 	updateQuery := fmt.Sprintf(
-		"UPDATE \"ms_graph\".\"room\" SET %s WHERE %s",
+		"UPDATE \"ms_graph\".\"asset\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, []string{"configuration_id"}),
-		strmangle.WhereClause("\"", "\"", 2, roomPrimaryKeyColumns),
+		strmangle.WhereClause("\"", "\"", 2, assetPrimaryKeyColumns),
 	)
 	values := []interface{}{related.ID, o.ID}
 
@@ -617,7 +663,7 @@ func (o *Room) SetConfiguration(ctx context.Context, exec boil.ContextExecutor, 
 
 	o.ConfigurationID = related.ID
 	if o.R == nil {
-		o.R = &roomR{
+		o.R = &assetR{
 			Configuration: related,
 		}
 	} else {
@@ -626,71 +672,71 @@ func (o *Room) SetConfiguration(ctx context.Context, exec boil.ContextExecutor, 
 
 	if related.R == nil {
 		related.R = &configurationR{
-			Rooms: RoomSlice{o},
+			Assets: AssetSlice{o},
 		}
 	} else {
-		related.R.Rooms = append(related.R.Rooms, o)
+		related.R.Assets = append(related.R.Assets, o)
 	}
 
 	return nil
 }
 
-// Rooms retrieves all the records using an executor.
-func Rooms(mods ...qm.QueryMod) roomQuery {
-	mods = append(mods, qm.From("\"ms_graph\".\"room\""))
+// Assets retrieves all the records using an executor.
+func Assets(mods ...qm.QueryMod) assetQuery {
+	mods = append(mods, qm.From("\"ms_graph\".\"asset\""))
 	q := NewQuery(mods...)
 	if len(queries.GetSelect(q)) == 0 {
-		queries.SetSelect(q, []string{"\"ms_graph\".\"room\".*"})
+		queries.SetSelect(q, []string{"\"ms_graph\".\"asset\".*"})
 	}
 
-	return roomQuery{q}
+	return assetQuery{q}
 }
 
-// FindRoomG retrieves a single record by ID.
-func FindRoomG(ctx context.Context, iD int64, selectCols ...string) (*Room, error) {
-	return FindRoom(ctx, boil.GetContextDB(), iD, selectCols...)
+// FindAssetG retrieves a single record by ID.
+func FindAssetG(ctx context.Context, iD int64, selectCols ...string) (*Asset, error) {
+	return FindAsset(ctx, boil.GetContextDB(), iD, selectCols...)
 }
 
-// FindRoom retrieves a single record by ID with an executor.
+// FindAsset retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindRoom(ctx context.Context, exec boil.ContextExecutor, iD int64, selectCols ...string) (*Room, error) {
-	roomObj := &Room{}
+func FindAsset(ctx context.Context, exec boil.ContextExecutor, iD int64, selectCols ...string) (*Asset, error) {
+	assetObj := &Asset{}
 
 	sel := "*"
 	if len(selectCols) > 0 {
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"ms_graph\".\"room\" where \"id\"=$1", sel,
+		"select %s from \"ms_graph\".\"asset\" where \"id\"=$1", sel,
 	)
 
 	q := queries.Raw(query, iD)
 
-	err := q.Bind(ctx, exec, roomObj)
+	err := q.Bind(ctx, exec, assetObj)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "appdb: unable to select from room")
+		return nil, errors.Wrap(err, "appdb: unable to select from asset")
 	}
 
-	if err = roomObj.doAfterSelectHooks(ctx, exec); err != nil {
-		return roomObj, err
+	if err = assetObj.doAfterSelectHooks(ctx, exec); err != nil {
+		return assetObj, err
 	}
 
-	return roomObj, nil
+	return assetObj, nil
 }
 
 // InsertG a single record. See Insert for whitelist behavior description.
-func (o *Room) InsertG(ctx context.Context, columns boil.Columns) error {
+func (o *Asset) InsertG(ctx context.Context, columns boil.Columns) error {
 	return o.Insert(ctx, boil.GetContextDB(), columns)
 }
 
 // Insert a single record using an executor.
 // See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
-func (o *Room) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
+func (o *Asset) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
 	if o == nil {
-		return errors.New("appdb: no room provided for insertion")
+		return errors.New("appdb: no asset provided for insertion")
 	}
 
 	var err error
@@ -699,33 +745,33 @@ func (o *Room) Insert(ctx context.Context, exec boil.ContextExecutor, columns bo
 		return err
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(roomColumnsWithDefault, o)
+	nzDefaults := queries.NonZeroDefaultSet(assetColumnsWithDefault, o)
 
 	key := makeCacheKey(columns, nzDefaults)
-	roomInsertCacheMut.RLock()
-	cache, cached := roomInsertCache[key]
-	roomInsertCacheMut.RUnlock()
+	assetInsertCacheMut.RLock()
+	cache, cached := assetInsertCache[key]
+	assetInsertCacheMut.RUnlock()
 
 	if !cached {
 		wl, returnColumns := columns.InsertColumnSet(
-			roomAllColumns,
-			roomColumnsWithDefault,
-			roomColumnsWithoutDefault,
+			assetAllColumns,
+			assetColumnsWithDefault,
+			assetColumnsWithoutDefault,
 			nzDefaults,
 		)
 
-		cache.valueMapping, err = queries.BindMapping(roomType, roomMapping, wl)
+		cache.valueMapping, err = queries.BindMapping(assetType, assetMapping, wl)
 		if err != nil {
 			return err
 		}
-		cache.retMapping, err = queries.BindMapping(roomType, roomMapping, returnColumns)
+		cache.retMapping, err = queries.BindMapping(assetType, assetMapping, returnColumns)
 		if err != nil {
 			return err
 		}
 		if len(wl) != 0 {
-			cache.query = fmt.Sprintf("INSERT INTO \"ms_graph\".\"room\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
+			cache.query = fmt.Sprintf("INSERT INTO \"ms_graph\".\"asset\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
 		} else {
-			cache.query = "INSERT INTO \"ms_graph\".\"room\" %sDEFAULT VALUES%s"
+			cache.query = "INSERT INTO \"ms_graph\".\"asset\" %sDEFAULT VALUES%s"
 		}
 
 		var queryOutput, queryReturning string
@@ -753,55 +799,55 @@ func (o *Room) Insert(ctx context.Context, exec boil.ContextExecutor, columns bo
 	}
 
 	if err != nil {
-		return errors.Wrap(err, "appdb: unable to insert into room")
+		return errors.Wrap(err, "appdb: unable to insert into asset")
 	}
 
 	if !cached {
-		roomInsertCacheMut.Lock()
-		roomInsertCache[key] = cache
-		roomInsertCacheMut.Unlock()
+		assetInsertCacheMut.Lock()
+		assetInsertCache[key] = cache
+		assetInsertCacheMut.Unlock()
 	}
 
 	return o.doAfterInsertHooks(ctx, exec)
 }
 
-// UpdateG a single Room record using the global executor.
+// UpdateG a single Asset record using the global executor.
 // See Update for more documentation.
-func (o *Room) UpdateG(ctx context.Context, columns boil.Columns) (int64, error) {
+func (o *Asset) UpdateG(ctx context.Context, columns boil.Columns) (int64, error) {
 	return o.Update(ctx, boil.GetContextDB(), columns)
 }
 
-// Update uses an executor to update the Room.
+// Update uses an executor to update the Asset.
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
-func (o *Room) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+func (o *Asset) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
 	var err error
 	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
 		return 0, err
 	}
 	key := makeCacheKey(columns, nil)
-	roomUpdateCacheMut.RLock()
-	cache, cached := roomUpdateCache[key]
-	roomUpdateCacheMut.RUnlock()
+	assetUpdateCacheMut.RLock()
+	cache, cached := assetUpdateCache[key]
+	assetUpdateCacheMut.RUnlock()
 
 	if !cached {
 		wl := columns.UpdateColumnSet(
-			roomAllColumns,
-			roomPrimaryKeyColumns,
+			assetAllColumns,
+			assetPrimaryKeyColumns,
 		)
 
 		if !columns.IsWhitelist() {
 			wl = strmangle.SetComplement(wl, []string{"created_at"})
 		}
 		if len(wl) == 0 {
-			return 0, errors.New("appdb: unable to update room, could not build whitelist")
+			return 0, errors.New("appdb: unable to update asset, could not build whitelist")
 		}
 
-		cache.query = fmt.Sprintf("UPDATE \"ms_graph\".\"room\" SET %s WHERE %s",
+		cache.query = fmt.Sprintf("UPDATE \"ms_graph\".\"asset\" SET %s WHERE %s",
 			strmangle.SetParamNames("\"", "\"", 1, wl),
-			strmangle.WhereClause("\"", "\"", len(wl)+1, roomPrimaryKeyColumns),
+			strmangle.WhereClause("\"", "\"", len(wl)+1, assetPrimaryKeyColumns),
 		)
-		cache.valueMapping, err = queries.BindMapping(roomType, roomMapping, append(wl, roomPrimaryKeyColumns...))
+		cache.valueMapping, err = queries.BindMapping(assetType, assetMapping, append(wl, assetPrimaryKeyColumns...))
 		if err != nil {
 			return 0, err
 		}
@@ -817,52 +863,52 @@ func (o *Room) Update(ctx context.Context, exec boil.ContextExecutor, columns bo
 	var result sql.Result
 	result, err = exec.ExecContext(ctx, cache.query, values...)
 	if err != nil {
-		return 0, errors.Wrap(err, "appdb: unable to update room row")
+		return 0, errors.Wrap(err, "appdb: unable to update asset row")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "appdb: failed to get rows affected by update for room")
+		return 0, errors.Wrap(err, "appdb: failed to get rows affected by update for asset")
 	}
 
 	if !cached {
-		roomUpdateCacheMut.Lock()
-		roomUpdateCache[key] = cache
-		roomUpdateCacheMut.Unlock()
+		assetUpdateCacheMut.Lock()
+		assetUpdateCache[key] = cache
+		assetUpdateCacheMut.Unlock()
 	}
 
 	return rowsAff, o.doAfterUpdateHooks(ctx, exec)
 }
 
 // UpdateAllG updates all rows with the specified column values.
-func (q roomQuery) UpdateAllG(ctx context.Context, cols M) (int64, error) {
+func (q assetQuery) UpdateAllG(ctx context.Context, cols M) (int64, error) {
 	return q.UpdateAll(ctx, boil.GetContextDB(), cols)
 }
 
 // UpdateAll updates all rows with the specified column values.
-func (q roomQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (q assetQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	queries.SetUpdate(q.Query, cols)
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "appdb: unable to update all for room")
+		return 0, errors.Wrap(err, "appdb: unable to update all for asset")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "appdb: unable to retrieve rows affected for room")
+		return 0, errors.Wrap(err, "appdb: unable to retrieve rows affected for asset")
 	}
 
 	return rowsAff, nil
 }
 
 // UpdateAllG updates all rows with the specified column values.
-func (o RoomSlice) UpdateAllG(ctx context.Context, cols M) (int64, error) {
+func (o AssetSlice) UpdateAllG(ctx context.Context, cols M) (int64, error) {
 	return o.UpdateAll(ctx, boil.GetContextDB(), cols)
 }
 
 // UpdateAll updates all rows with the specified column values, using an executor.
-func (o RoomSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (o AssetSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	ln := int64(len(o))
 	if ln == 0 {
 		return 0, nil
@@ -884,13 +930,13 @@ func (o RoomSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, col
 
 	// Append all of the primary key values for each column
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), roomPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), assetPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := fmt.Sprintf("UPDATE \"ms_graph\".\"room\" SET %s WHERE %s",
+	sql := fmt.Sprintf("UPDATE \"ms_graph\".\"asset\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, colNames),
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, roomPrimaryKeyColumns, len(o)))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, assetPrimaryKeyColumns, len(o)))
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -899,33 +945,33 @@ func (o RoomSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, col
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "appdb: unable to update all in room slice")
+		return 0, errors.Wrap(err, "appdb: unable to update all in asset slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "appdb: unable to retrieve rows affected all in update all room")
+		return 0, errors.Wrap(err, "appdb: unable to retrieve rows affected all in update all asset")
 	}
 	return rowsAff, nil
 }
 
 // UpsertG attempts an insert, and does an update or ignore on conflict.
-func (o *Room) UpsertG(ctx context.Context, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
+func (o *Asset) UpsertG(ctx context.Context, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
 	return o.Upsert(ctx, boil.GetContextDB(), updateOnConflict, conflictColumns, updateColumns, insertColumns)
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.
 // See boil.Columns documentation for how to properly use updateColumns and insertColumns.
-func (o *Room) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
+func (o *Asset) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
-		return errors.New("appdb: no room provided for upsert")
+		return errors.New("appdb: no asset provided for upsert")
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {
 		return err
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(roomColumnsWithDefault, o)
+	nzDefaults := queries.NonZeroDefaultSet(assetColumnsWithDefault, o)
 
 	// Build cache key in-line uglily - mysql vs psql problems
 	buf := strmangle.GetBuffer()
@@ -955,42 +1001,42 @@ func (o *Room) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnCo
 	key := buf.String()
 	strmangle.PutBuffer(buf)
 
-	roomUpsertCacheMut.RLock()
-	cache, cached := roomUpsertCache[key]
-	roomUpsertCacheMut.RUnlock()
+	assetUpsertCacheMut.RLock()
+	cache, cached := assetUpsertCache[key]
+	assetUpsertCacheMut.RUnlock()
 
 	var err error
 
 	if !cached {
 		insert, ret := insertColumns.InsertColumnSet(
-			roomAllColumns,
-			roomColumnsWithDefault,
-			roomColumnsWithoutDefault,
+			assetAllColumns,
+			assetColumnsWithDefault,
+			assetColumnsWithoutDefault,
 			nzDefaults,
 		)
 
 		update := updateColumns.UpdateColumnSet(
-			roomAllColumns,
-			roomPrimaryKeyColumns,
+			assetAllColumns,
+			assetPrimaryKeyColumns,
 		)
 
 		if updateOnConflict && len(update) == 0 {
-			return errors.New("appdb: unable to upsert room, could not build update column list")
+			return errors.New("appdb: unable to upsert asset, could not build update column list")
 		}
 
 		conflict := conflictColumns
 		if len(conflict) == 0 {
-			conflict = make([]string, len(roomPrimaryKeyColumns))
-			copy(conflict, roomPrimaryKeyColumns)
+			conflict = make([]string, len(assetPrimaryKeyColumns))
+			copy(conflict, assetPrimaryKeyColumns)
 		}
-		cache.query = buildUpsertQueryPostgres(dialect, "\"ms_graph\".\"room\"", updateOnConflict, ret, update, conflict, insert)
+		cache.query = buildUpsertQueryPostgres(dialect, "\"ms_graph\".\"asset\"", updateOnConflict, ret, update, conflict, insert)
 
-		cache.valueMapping, err = queries.BindMapping(roomType, roomMapping, insert)
+		cache.valueMapping, err = queries.BindMapping(assetType, assetMapping, insert)
 		if err != nil {
 			return err
 		}
 		if len(ret) != 0 {
-			cache.retMapping, err = queries.BindMapping(roomType, roomMapping, ret)
+			cache.retMapping, err = queries.BindMapping(assetType, assetMapping, ret)
 			if err != nil {
 				return err
 			}
@@ -1018,37 +1064,37 @@ func (o *Room) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnCo
 		_, err = exec.ExecContext(ctx, cache.query, vals...)
 	}
 	if err != nil {
-		return errors.Wrap(err, "appdb: unable to upsert room")
+		return errors.Wrap(err, "appdb: unable to upsert asset")
 	}
 
 	if !cached {
-		roomUpsertCacheMut.Lock()
-		roomUpsertCache[key] = cache
-		roomUpsertCacheMut.Unlock()
+		assetUpsertCacheMut.Lock()
+		assetUpsertCache[key] = cache
+		assetUpsertCacheMut.Unlock()
 	}
 
 	return o.doAfterUpsertHooks(ctx, exec)
 }
 
-// DeleteG deletes a single Room record.
+// DeleteG deletes a single Asset record.
 // DeleteG will match against the primary key column to find the record to delete.
-func (o *Room) DeleteG(ctx context.Context) (int64, error) {
+func (o *Asset) DeleteG(ctx context.Context) (int64, error) {
 	return o.Delete(ctx, boil.GetContextDB())
 }
 
-// Delete deletes a single Room record with an executor.
+// Delete deletes a single Asset record with an executor.
 // Delete will match against the primary key column to find the record to delete.
-func (o *Room) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o *Asset) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("appdb: no Room provided for delete")
+		return 0, errors.New("appdb: no Asset provided for delete")
 	}
 
 	if err := o.doBeforeDeleteHooks(ctx, exec); err != nil {
 		return 0, err
 	}
 
-	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), roomPrimaryKeyMapping)
-	sql := "DELETE FROM \"ms_graph\".\"room\" WHERE \"id\"=$1"
+	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), assetPrimaryKeyMapping)
+	sql := "DELETE FROM \"ms_graph\".\"asset\" WHERE \"id\"=$1"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1057,12 +1103,12 @@ func (o *Room) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, er
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "appdb: unable to delete from room")
+		return 0, errors.Wrap(err, "appdb: unable to delete from asset")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "appdb: failed to get rows affected by delete for room")
+		return 0, errors.Wrap(err, "appdb: failed to get rows affected by delete for asset")
 	}
 
 	if err := o.doAfterDeleteHooks(ctx, exec); err != nil {
@@ -1072,43 +1118,43 @@ func (o *Room) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, er
 	return rowsAff, nil
 }
 
-func (q roomQuery) DeleteAllG(ctx context.Context) (int64, error) {
+func (q assetQuery) DeleteAllG(ctx context.Context) (int64, error) {
 	return q.DeleteAll(ctx, boil.GetContextDB())
 }
 
 // DeleteAll deletes all matching rows.
-func (q roomQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q assetQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if q.Query == nil {
-		return 0, errors.New("appdb: no roomQuery provided for delete all")
+		return 0, errors.New("appdb: no assetQuery provided for delete all")
 	}
 
 	queries.SetDelete(q.Query)
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "appdb: unable to delete all from room")
+		return 0, errors.Wrap(err, "appdb: unable to delete all from asset")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "appdb: failed to get rows affected by deleteall for room")
+		return 0, errors.Wrap(err, "appdb: failed to get rows affected by deleteall for asset")
 	}
 
 	return rowsAff, nil
 }
 
 // DeleteAllG deletes all rows in the slice.
-func (o RoomSlice) DeleteAllG(ctx context.Context) (int64, error) {
+func (o AssetSlice) DeleteAllG(ctx context.Context) (int64, error) {
 	return o.DeleteAll(ctx, boil.GetContextDB())
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
-func (o RoomSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o AssetSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if len(o) == 0 {
 		return 0, nil
 	}
 
-	if len(roomBeforeDeleteHooks) != 0 {
+	if len(assetBeforeDeleteHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doBeforeDeleteHooks(ctx, exec); err != nil {
 				return 0, err
@@ -1118,12 +1164,12 @@ func (o RoomSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (in
 
 	var args []interface{}
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), roomPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), assetPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "DELETE FROM \"ms_graph\".\"room\" WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, roomPrimaryKeyColumns, len(o))
+	sql := "DELETE FROM \"ms_graph\".\"asset\" WHERE " +
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, assetPrimaryKeyColumns, len(o))
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1132,15 +1178,15 @@ func (o RoomSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (in
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "appdb: unable to delete all from room slice")
+		return 0, errors.Wrap(err, "appdb: unable to delete all from asset slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "appdb: failed to get rows affected by deleteall for room")
+		return 0, errors.Wrap(err, "appdb: failed to get rows affected by deleteall for asset")
 	}
 
-	if len(roomAfterDeleteHooks) != 0 {
+	if len(assetAfterDeleteHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doAfterDeleteHooks(ctx, exec); err != nil {
 				return 0, err
@@ -1152,9 +1198,9 @@ func (o RoomSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (in
 }
 
 // ReloadG refetches the object from the database using the primary keys.
-func (o *Room) ReloadG(ctx context.Context) error {
+func (o *Asset) ReloadG(ctx context.Context) error {
 	if o == nil {
-		return errors.New("appdb: no Room provided for reload")
+		return errors.New("appdb: no Asset provided for reload")
 	}
 
 	return o.Reload(ctx, boil.GetContextDB())
@@ -1162,8 +1208,8 @@ func (o *Room) ReloadG(ctx context.Context) error {
 
 // Reload refetches the object from the database
 // using the primary keys with an executor.
-func (o *Room) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindRoom(ctx, exec, o.ID)
+func (o *Asset) Reload(ctx context.Context, exec boil.ContextExecutor) error {
+	ret, err := FindAsset(ctx, exec, o.ID)
 	if err != nil {
 		return err
 	}
@@ -1174,9 +1220,9 @@ func (o *Room) Reload(ctx context.Context, exec boil.ContextExecutor) error {
 
 // ReloadAllG refetches every row with matching primary key column values
 // and overwrites the original object slice with the newly updated slice.
-func (o *RoomSlice) ReloadAllG(ctx context.Context) error {
+func (o *AssetSlice) ReloadAllG(ctx context.Context) error {
 	if o == nil {
-		return errors.New("appdb: empty RoomSlice provided for reload all")
+		return errors.New("appdb: empty AssetSlice provided for reload all")
 	}
 
 	return o.ReloadAll(ctx, boil.GetContextDB())
@@ -1184,26 +1230,26 @@ func (o *RoomSlice) ReloadAllG(ctx context.Context) error {
 
 // ReloadAll refetches every row with matching primary key column values
 // and overwrites the original object slice with the newly updated slice.
-func (o *RoomSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
+func (o *AssetSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
 	if o == nil || len(*o) == 0 {
 		return nil
 	}
 
-	slice := RoomSlice{}
+	slice := AssetSlice{}
 	var args []interface{}
 	for _, obj := range *o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), roomPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), assetPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "SELECT \"ms_graph\".\"room\".* FROM \"ms_graph\".\"room\" WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, roomPrimaryKeyColumns, len(*o))
+	sql := "SELECT \"ms_graph\".\"asset\".* FROM \"ms_graph\".\"asset\" WHERE " +
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, assetPrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
 
 	err := q.Bind(ctx, exec, &slice)
 	if err != nil {
-		return errors.Wrap(err, "appdb: unable to reload all in RoomSlice")
+		return errors.Wrap(err, "appdb: unable to reload all in AssetSlice")
 	}
 
 	*o = slice
@@ -1211,15 +1257,15 @@ func (o *RoomSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) er
 	return nil
 }
 
-// RoomExistsG checks if the Room row exists.
-func RoomExistsG(ctx context.Context, iD int64) (bool, error) {
-	return RoomExists(ctx, boil.GetContextDB(), iD)
+// AssetExistsG checks if the Asset row exists.
+func AssetExistsG(ctx context.Context, iD int64) (bool, error) {
+	return AssetExists(ctx, boil.GetContextDB(), iD)
 }
 
-// RoomExists checks if the Room row exists.
-func RoomExists(ctx context.Context, exec boil.ContextExecutor, iD int64) (bool, error) {
+// AssetExists checks if the Asset row exists.
+func AssetExists(ctx context.Context, exec boil.ContextExecutor, iD int64) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"ms_graph\".\"room\" where \"id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"ms_graph\".\"asset\" where \"id\"=$1 limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -1230,13 +1276,13 @@ func RoomExists(ctx context.Context, exec boil.ContextExecutor, iD int64) (bool,
 
 	err := row.Scan(&exists)
 	if err != nil {
-		return false, errors.Wrap(err, "appdb: unable to check if room exists")
+		return false, errors.Wrap(err, "appdb: unable to check if asset exists")
 	}
 
 	return exists, nil
 }
 
-// Exists checks if the Room row exists.
-func (o *Room) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
-	return RoomExists(ctx, exec, o.ID)
+// Exists checks if the Asset row exists.
+func (o *Asset) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
+	return AssetExists(ctx, exec, o.ID)
 }

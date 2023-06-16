@@ -171,3 +171,24 @@ func SetAllConfigsInactive(ctx context.Context) (int64, error) {
 		appdb.ConfigurationColumns.Active: false,
 	})
 }
+
+func InsertAsset(ctx context.Context, config apiserver.Configuration, projId string, globalAssetID string, assetId int32) error {
+	var dbAsset appdb.Asset
+	dbAsset.ConfigurationID = null.Int64FromPtr(config.Id).Int64
+	dbAsset.ProjectID = projId
+	dbAsset.GlobalAssetID = globalAssetID
+	dbAsset.AssetID = null.Int32From(assetId)
+	return dbAsset.InsertG(ctx, boil.Infer())
+}
+
+func GetAssetId(ctx context.Context, config apiserver.Configuration, projId string, globalAssetID string) (*int32, error) {
+	dbAsset, err := appdb.Assets(
+		appdb.AssetWhere.ConfigurationID.EQ(null.Int64FromPtr(config.Id).Int64),
+		appdb.AssetWhere.ProjectID.EQ(projId),
+		appdb.AssetWhere.GlobalAssetID.EQ(globalAssetID),
+	).AllG(ctx)
+	if err != nil || len(dbAsset) == 0 {
+		return nil, err
+	}
+	return common.Ptr(dbAsset[0].AssetID.Int32), nil
+}

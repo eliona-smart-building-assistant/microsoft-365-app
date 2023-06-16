@@ -32,7 +32,7 @@ create table if not exists ms_graph.configuration
 	project_ids      text[]
 );
 
-create table if not exists ms_graph.room
+create table if not exists ms_graph.asset
 (
 	id               bigserial primary key,
 	configuration_id bigserial not null references ms_graph.configuration(id),

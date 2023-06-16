@@ -4,9 +4,9 @@
 package appdb
 
 var TableNames = struct {
+	Asset         string
 	Configuration string
-	Room          string
 }{
+	Asset:         "asset",
 	Configuration: "configuration",
-	Room:          "room",
 }

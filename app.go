@@ -22,6 +22,7 @@ import (
 	"template/apiserver"
 	"template/apiservices"
 	"template/conf"
+	"template/eliona"
 	"template/msgraph"
 	"time"
 
@@ -94,10 +95,10 @@ func collectRooms(config apiserver.Configuration) error {
 		return err
 	}
 	fmt.Printf("got %v rooms.\n", len(rooms))
-	// if err := eliona.CreateRoomsAssetsIfNecessary(config, rooms); err != nil {
-	// 	log.Error("eliona", "creating location assets: %v", err)
-	// 	return err
-	// }
+	if err := eliona.CreateRoomsAssetsIfNecessary(config, rooms); err != nil {
+		log.Error("eliona", "creating location assets: %v", err)
+		return err
+	}
 
 	// if err := eliona.UpsertRoomData(config, rooms); err != nil {
 	// 	log.Error("eliona", "inserting location data into Eliona: %v", err)

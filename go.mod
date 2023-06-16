@@ -50,7 +50,7 @@ replace github.com/ericlagergren/decimal => github.com/ericlagergren/decimal v0.
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.3.0
-	github.com/eliona-smart-building-assistant/go-eliona-api-client/v2 v2.4.20 // indirect
+	github.com/eliona-smart-building-assistant/go-eliona-api-client/v2 v2.4.20
 	github.com/friendsofgo/errors v0.9.2
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.14.0 // indirect
