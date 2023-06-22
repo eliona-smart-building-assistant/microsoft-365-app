@@ -41,6 +41,11 @@ tags:
     externalDocs:
       url: https://github.com/eliona-smart-building-assistant/app-template
 
+  - name: Proxy
+    description: MS Graph proxy - implemented standalone
+    externalDocs:
+      url: https://github.com/eliona-smart-building-assistant/app-template
+
 paths:
   /configurations:
     get:
@@ -139,6 +144,36 @@ paths:
             application/json:
               schema:
                 $ref: "https://raw.githubusercontent.com/eliona-smart-building-assistant/eliona-api/main/openapi.yaml#/components/schemas/Dashboard"
+        404:
+          description: Template name not found
+
+  /msproxy/{ms-graph-path}:
+    get:
+      tags:
+        - Proxy
+      summary: A proxy server that passes requests to the MS Graph API
+      parameters:
+        - name: ms-graph-path
+          in: path
+          description: ...
+          required: true
+          schema:
+            type: string
+            example: rooms/me
+        - name: projectId
+          in: query
+          description: Define the project from which the configurations should be used.
+          required: false
+          schema:
+            type: string
+            example: 99
+      responses:
+        200:
+          description: Successfully returned API responses
+          content:
+            application/json:
+              schema:
+                type: object
         404:
           description: Template name not found
 

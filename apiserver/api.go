@@ -29,6 +29,13 @@ type CustomizationApiRouter interface {
 	GetDashboardTemplateByName(http.ResponseWriter, *http.Request)
 }
 
+// ProxyApiRouter defines the required methods for binding the api requests to a responses for the ProxyApi
+// The ProxyApiRouter implementation should parse necessary information from the http request,
+// pass the data to a ProxyApiServicer to perform the required actions, then write the service results to the http response.
+type ProxyApiRouter interface {
+	MsproxyMsGraphPathGet(http.ResponseWriter, *http.Request)
+}
+
 // VersionApiRouter defines the required methods for binding the api requests to a responses for the VersionApi
 // The VersionApiRouter implementation should parse necessary information from the http request,
 // pass the data to a VersionApiServicer to perform the required actions, then write the service results to the http response.
@@ -52,6 +59,14 @@ type ConfigurationApiServicer interface {
 // and updated with the logic required for the API.
 type CustomizationApiServicer interface {
 	GetDashboardTemplateByName(context.Context, string, string) (ImplResponse, error)
+}
+
+// ProxyApiServicer defines the api actions for the ProxyApi service
+// This interface intended to stay up to date with the openapi yaml used to generate it,
+// while the service implementation can be ignored with the .openapi-generator-ignore file
+// and updated with the logic required for the API.
+type ProxyApiServicer interface {
+	MsproxyMsGraphPathGet(context.Context, string, string) (ImplResponse, error)
 }
 
 // VersionApiServicer defines the api actions for the VersionApi service

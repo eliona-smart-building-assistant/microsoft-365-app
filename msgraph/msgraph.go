@@ -243,11 +243,10 @@ func (g *GraphHelper) GetRooms(config apiserver.Configuration) ([]Room, error) {
 			return false
 		}
 		if !adheres {
-			log.Debug("ms-graph", "Room %s skipped.", room.EmailAddress)
+			log.Debug("ms-graph", "Room %s skipped.", *room.EmailAddress)
 			return true
 		}
 		rooms = append(rooms, room)
-		fmt.Printf("%+v:\n", room)
 		// Return true to continue the iteration
 		return true
 	}); err != nil {

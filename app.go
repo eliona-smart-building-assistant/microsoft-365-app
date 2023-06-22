@@ -28,6 +28,7 @@ import (
 
 	"github.com/eliona-smart-building-assistant/go-utils/common"
 	"github.com/eliona-smart-building-assistant/go-utils/log"
+	"github.com/gorilla/mux"
 )
 
 // collectData is the main app function which is called periodically
@@ -96,12 +97,12 @@ func collectRooms(config apiserver.Configuration) error {
 	}
 	fmt.Printf("got %v rooms.\n", len(rooms))
 	if err := eliona.CreateRoomsAssetsIfNecessary(config, rooms); err != nil {
-		log.Error("eliona", "creating location assets: %v", err)
+		log.Error("eliona", "creating room assets: %v", err)
 		return err
 	}
 
 	// if err := eliona.UpsertRoomData(config, rooms); err != nil {
-	// 	log.Error("eliona", "inserting location data into Eliona: %v", err)
+	// 	log.Error("eliona", "inserting room data into Eliona: %v", err)
 	// 	return err
 	// }
 	return nil
@@ -109,10 +110,16 @@ func collectRooms(config apiserver.Configuration) error {
 
 // listenApi starts the API server and listen for requests
 func listenApi() {
-	err := http.ListenAndServe(":"+common.Getenv("API_SERVER_PORT", "3000"), apiserver.NewRouter(
+	r := mux.NewRouter()
+	msproxyUrl := "/v1/msproxy/"
+	r.PathPrefix(msproxyUrl).Handler(http.StripPrefix(msproxyUrl, &msgraph.Proxy{}))
+
+	r.PathPrefix("/").Handler(apiserver.NewRouter(
 		apiserver.NewConfigurationApiController(apiservices.NewConfigurationApiService()),
 		apiserver.NewVersionApiController(apiservices.NewVersionApiService()),
 		apiserver.NewCustomizationApiController(apiservices.NewCustomizationApiService()),
 	))
+
+	err := http.ListenAndServe(":"+common.Getenv("API_SERVER_PORT", "3000"), r)
 	log.Fatal("main", "API server: %v", err)
 }
