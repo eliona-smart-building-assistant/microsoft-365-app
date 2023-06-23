@@ -1,4 +1,4 @@
-module template
+module ms-graph
 
 go 1.20
 

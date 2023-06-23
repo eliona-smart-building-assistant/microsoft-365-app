@@ -18,9 +18,9 @@ package eliona
 import (
 	"context"
 	"fmt"
-	"template/apiserver"
-	"template/conf"
-	"template/msgraph"
+	"ms-graph/apiserver"
+	"ms-graph/conf"
+	"ms-graph/msgraph"
 
 	api "github.com/eliona-smart-building-assistant/go-eliona-api-client/v2"
 	"github.com/eliona-smart-building-assistant/go-eliona/asset"

@@ -17,34 +17,34 @@ openapi: 3.0.3
 
 info:
   version: 1.0.0
-  title: App template API
-  description: API to access and configure the app template
+  title: MS Graph App
+  description: API to access and configure the MS Graph App
 externalDocs:
-  description: Find out more about the app template
-  url: https://github.com/eliona-smart-building-assistant/app-template
+  description: MS Graph App repository
+  url: https://github.com/eliona-smart-building-assistant/ms-graph-app
 servers:
-  - url: http://template/v1
+  - url: http://ms-graph/v1
 
 tags:
   - name: Configuration
     description: Configure the app
     externalDocs:
-      url: https://github.com/eliona-smart-building-assistant/app-template
+      url: https://github.com/eliona-smart-building-assistant/ms-graph-app
 
   - name: Version
     description: API version
     externalDocs:
-      url: https://github.com/eliona-smart-building-assistant/app-template
+      url: https://github.com/eliona-smart-building-assistant/ms-graph-app
 
   - name: Customization
     description: Help to customize Eliona environment
     externalDocs:
-      url: https://github.com/eliona-smart-building-assistant/app-template
+      url: https://github.com/eliona-smart-building-assistant/ms-graph-app
 
   - name: Proxy
     description: MS Graph proxy - implemented standalone
     externalDocs:
-      url: https://github.com/eliona-smart-building-assistant/app-template
+      url: https://github.com/eliona-smart-building-assistant/ms-graph-app
 
 paths:
   /configurations:
@@ -129,7 +129,7 @@ paths:
           required: true
           schema:
             type: string
-            example: Template
+            example: MS Graph
         - name: projectId
           in: query
           description: Define the project the dashboard should be

@@ -20,8 +20,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"template/apiserver"
-	"template/appdb"
+	"ms-graph/apiserver"
+	"ms-graph/appdb"
 
 	"github.com/eliona-smart-building-assistant/go-utils/common"
 	"github.com/volatiletech/null/v8"

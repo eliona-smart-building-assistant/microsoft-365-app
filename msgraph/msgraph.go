@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-	"template/apiserver"
+	"ms-graph/apiserver"
 
 	azcore "github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
