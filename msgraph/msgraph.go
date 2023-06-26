@@ -32,7 +32,7 @@ func NewGraphHelper() *GraphHelper {
 	return g
 }
 
-func (g *GraphHelper) InitializeGraphForUserAuth(clientId, tenantId, clientSecret, username, password string) error {
+func (g *GraphHelper) InitializeGraph(clientId, tenantId, clientSecret, username, password string) error {
 	if username != "" {
 		cred, err := azidentity.NewUsernamePasswordCredential(
 			tenantId,

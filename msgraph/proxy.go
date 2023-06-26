@@ -39,7 +39,7 @@ func (proxy *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			log.Error("conf", "Shouldn't happen: some values are nil")
 			return
 		}
-		if err := graph.InitializeGraphForUserAuth(config.ClientId, config.TenantId, *config.ClientSecret, *config.Username, *config.Password); err != nil {
+		if err := graph.InitializeGraph(config.ClientId, config.TenantId, *config.ClientSecret, *config.Username, *config.Password); err != nil {
 			log.Error("ms-graph", "initializing graph for user auth: %v", err)
 			return
 		}

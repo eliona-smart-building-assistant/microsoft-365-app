@@ -85,7 +85,7 @@ func collectRooms(config apiserver.Configuration) error {
 		log.Error("conf", "Shouldn't happen: some values are nil")
 		return fmt.Errorf("shouldn't happen: some values are nil")
 	}
-	if err := graph.InitializeGraphForUserAuth(config.ClientId, config.TenantId, *config.ClientSecret, *config.Username, *config.Password); err != nil {
+	if err := graph.InitializeGraph(config.ClientId, config.TenantId, *config.ClientSecret, *config.Username, *config.Password); err != nil {
 		log.Error("ms-graph", "initializing graph for user auth: %v", err)
 		return err
 	}
