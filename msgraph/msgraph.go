@@ -3,8 +3,6 @@ package msgraph
 import (
 	"context"
 	"fmt"
-	"reflect"
-	"strings"
 	"ms-graph/apiserver"
 
 	azcore "github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -17,6 +15,7 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/models/odataerrors"
 	"github.com/microsoftgraph/msgraph-sdk-go/users"
 
+	"github.com/eliona-smart-building-assistant/go-eliona/utils"
 	"github.com/eliona-smart-building-assistant/go-utils/common"
 	"github.com/eliona-smart-building-assistant/go-utils/log"
 )
@@ -185,28 +184,28 @@ func mapBookingType(bt *models.BookingType) BookingType {
 }
 
 type Room struct {
-	Address                PhysicalAddress `eliona:"address" subtype:"info"`
-	DisplayName            *string         `eliona:"display_name" subtype:"info"`
-	Nickname               *string         `eliona:"nickname" subtype:"info"`
-	Label                  *string         `eliona:"label" subtype:"info"`
-	GeoCoordinates         GeoCoordinates  `eliona:"geo_coordinates" subtype:"info"`
-	Phone                  *string         `eliona:"phone" subtype:"info"`
-	EmailAddress           *string         `eliona:"email_address" subtype:"info"`
-	BookingType            BookingType     `eliona:"booking_type" subtype:"info"`
-	Building               *string         `eliona:"building" subtype:"info"`
-	Capacity               *int32          `eliona:"capacity" subtype:"info"`
-	FloorLabel             *string         `eliona:"floor_label" subtype:"info"`
-	FloorNumber            *int32          `eliona:"floor_number" subtype:"info"`
-	IsWheelChairAccessible *bool           `eliona:"is_wheel_chair_accessible" subtype:"info"`
-	Tags                   []string        `eliona:"tags" subtype:"info"`
-	DisplayDeviceName      *string         `eliona:"display_device_name" subtype:"info"`
-	AudioDeviceName        *string         `eliona:"audio_device_name" subtype:"info"`
-	VideoDeviceName        *string         `eliona:"video_device_name" subtype:"info"`
+	Address                PhysicalAddress `eliona:"address,filterable" subtype:"info"`
+	DisplayName            *string         `eliona:"display_name,filterable" subtype:"info"`
+	Nickname               *string         `eliona:"nickname,filterable" subtype:"info"`
+	Label                  *string         `eliona:"label,filterable" subtype:"info"`
+	GeoCoordinates         GeoCoordinates  `eliona:"geo_coordinates,filterable" subtype:"info"`
+	Phone                  *string         `eliona:"phone,filterable" subtype:"info"`
+	EmailAddress           *string         `eliona:"email_address,filterable" subtype:"info"`
+	BookingType            BookingType     `eliona:"booking_type,filterable" subtype:"info"`
+	Building               *string         `eliona:"building,filterable" subtype:"info"`
+	Capacity               *int32          `eliona:"capacity,filterable" subtype:"info"`
+	FloorLabel             *string         `eliona:"floor_label,filterable" subtype:"info"`
+	FloorNumber            *int32          `eliona:"floor_number,filterable" subtype:"info"`
+	IsWheelChairAccessible *bool           `eliona:"is_wheel_chair_accessible,filterable" subtype:"info"`
+	Tags                   []string        `eliona:"tags,filterable" subtype:"info"`
+	DisplayDeviceName      *string         `eliona:"display_device_name,filterable" subtype:"info"`
+	AudioDeviceName        *string         `eliona:"audio_device_name,filterable" subtype:"info"`
+	VideoDeviceName        *string         `eliona:"video_device_name,filterable" subtype:"info"`
 }
 
 func (room *Room) AdheresToFilter(config apiserver.Configuration) (bool, error) {
 	f := apiFilterToCommonFilter(config.AssetFilter)
-	fp, err := structToMap(room)
+	fp, err := utils.StructToMap(room)
 	if err != nil {
 		return false, fmt.Errorf("converting struct to map: %v", err)
 	}
@@ -215,6 +214,20 @@ func (room *Room) AdheresToFilter(config apiserver.Configuration) (bool, error) 
 		return false, err
 	}
 	return adheres, nil
+}
+
+func apiFilterToCommonFilter(input [][]apiserver.FilterRule) [][]common.FilterRule {
+	result := make([][]common.FilterRule, len(input))
+	for i := 0; i < len(input); i++ {
+		result[i] = make([]common.FilterRule, len(input[i]))
+		for j := 0; j < len(input[i]); j++ {
+			result[i][j] = common.FilterRule{
+				Parameter: input[i][j].Parameter,
+				Regex:     input[i][j].Regex,
+			}
+		}
+	}
+	return result
 }
 
 func (g *GraphHelper) GetRooms(config apiserver.Configuration) ([]Room, error) {
@@ -312,104 +325,4 @@ func printOdataError(err error) {
 	default:
 		fmt.Printf("%T > error: %#v", err, err)
 	}
-}
-
-// To be moved to go-utils.
-
-func structToMap(input interface{}) (map[string]string, error) {
-	if input == nil {
-		return nil, fmt.Errorf("input is nil")
-	}
-
-	inputValue := reflect.ValueOf(input)
-	inputType := reflect.TypeOf(input)
-
-	if inputValue.Kind() == reflect.Ptr {
-		inputValue = inputValue.Elem()
-		inputType = inputType.Elem()
-	}
-
-	if inputValue.Kind() != reflect.Struct {
-		return nil, fmt.Errorf("input is not a struct")
-	}
-
-	output := make(map[string]string)
-	for i := 0; i < inputValue.NumField(); i++ {
-		fieldType := inputType.Field(i)
-
-		fieldTag, err := parseElionaTag(fieldType)
-		if err != nil {
-			return nil, err
-		}
-
-		if !fieldTag.Filterable {
-			continue
-		}
-
-		fieldValue := inputValue.Field(i)
-		output[fieldTag.ParamName] = fieldValue.String()
-	}
-
-	return output, nil
-}
-
-type SubType string
-
-const (
-	Status SubType = "status"
-	Info   SubType = "info"
-	Input  SubType = "input"
-	Output SubType = "output"
-)
-
-type FieldTag struct {
-	ParamName  string
-	SubType    SubType
-	Filterable bool
-}
-
-func parseElionaTag(field reflect.StructField) (*FieldTag, error) {
-	elionaTag := field.Tag.Get("eliona")
-	subtypeTag := field.Tag.Get("subtype")
-
-	elionaTagParts := strings.Split(elionaTag, ",")
-	if len(elionaTagParts) < 1 {
-		return nil, fmt.Errorf("invalid eliona tag on field %s", field.Name)
-	}
-
-	paramName := elionaTagParts[0]
-	filterable := len(elionaTagParts) > 1 && elionaTagParts[1] == "filterable"
-
-	var subType SubType
-	if subtypeTag != "" {
-		subType = SubType(subtypeTag)
-		switch subType {
-		case Status, Info, Input, Output:
-			// valid subtype
-		default:
-			return nil, fmt.Errorf("invalid subtype in eliona tag on field %s", field.Name)
-		}
-	}
-
-	return &FieldTag{
-		ParamName:  paramName,
-		SubType:    subType,
-		Filterable: filterable,
-	}, nil
-}
-
-// ^^ To be moved to go-utils.
-
-func apiFilterToCommonFilter(input [][]apiserver.FilterRule) [][]common.FilterRule {
-	result := make([][]common.FilterRule, len(input))
-	for i := 0; i < len(input); i++ {
-		result[i] = make([]common.FilterRule, len(input[i]))
-		for j := 0; j < len(input[i]); j++ {
-			result[i][j] = common.FilterRule{
-				Parameter: input[i][j].Parameter,
-				Regex:     input[i][j].Regex,
-			}
-		}
-	}
-	return result
 }
