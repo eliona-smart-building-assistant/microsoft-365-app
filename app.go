@@ -18,12 +18,12 @@ package main
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"ms-graph/apiserver"
 	"ms-graph/apiservices"
 	"ms-graph/conf"
 	"ms-graph/eliona"
 	"ms-graph/msgraph"
+	"net/http"
 	"time"
 
 	"github.com/eliona-smart-building-assistant/go-utils/common"
@@ -101,10 +101,10 @@ func collectRooms(config apiserver.Configuration) error {
 		return err
 	}
 
-	// if err := eliona.UpsertRoomData(config, rooms); err != nil {
-	// 	log.Error("eliona", "inserting room data into Eliona: %v", err)
-	// 	return err
-	// }
+	if err := eliona.UpsertRoomData(config, rooms); err != nil {
+		log.Error("eliona", "inserting room data into Eliona: %v", err)
+		return err
+	}
 	return nil
 }
 
