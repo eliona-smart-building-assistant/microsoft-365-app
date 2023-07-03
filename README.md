@@ -1,6 +1,6 @@
-# Eliona App to access MS Graph
+# Eliona App to access Microsoft 365
 
-This app allows connecting [Microsoft Graph](https://learn.microsoft.com/en-us/graph/overview) to an Eliona instance.
+This app allows connecting Microsoft 365 services through [Microsoft Graph](https://learn.microsoft.com/en-us/graph/overview) to an Eliona instance.
 
 ## Configuration
 
@@ -16,7 +16,7 @@ This initialization can be handled by the `reset.sql` script.
 
 ### Environment variables
 
-- `APPNAME`: must be set to `ms-graph`. Some resources use this name to identify the app inside an Eliona environment.
+- `APPNAME`: must be set to `microsoft-365`. Some resources use this name to identify the app inside an Eliona environment.
 
 - `CONNECTION_STRING`: configures the [Eliona database](https://github.com/eliona-smart-building-assistant/go-eliona/tree/main/db). Otherwise, the app can't be initialized and started. (e.g. `postgres://user:pass@localhost:5432/iot`)
 
@@ -30,7 +30,7 @@ This initialization can be handled by the `reset.sql` script.
 
 ### Database tables ###
 
-The app requires configuration data that remains in the database. To do this, the app creates its own database schema `ms_graph` during initialization. To modify and handle the configuration data the app provides an API access. Have a look at the [API specification](https://eliona-smart-building-assistant.github.io/open-api-docs/?https://raw.githubusercontent.com/eliona-smart-building-assistant/ms-graph-app/develop/openapi.yaml) how the configuration tables should be used.
+The app requires configuration data that remains in the database. To do this, the app creates its own database schema `microsoft_365` during initialization. To modify and handle the configuration data the app provides an API access. Have a look at the [API specification](https://eliona-smart-building-assistant.github.io/open-api-docs/?https://raw.githubusercontent.com/eliona-smart-building-assistant/microsoft-365-app/develop/openapi.yaml) how the configuration tables should be used.
 
 **Generation**: to generate access method to database see Generation section below.
 
@@ -41,7 +41,7 @@ The app requires configuration data that remains in the database. To do this, th
 
 The app provides its own API to access configuration data and other functions. The full description of the API is defined in the `openapi.yaml` OpenAPI definition file.
 
-- [API Reference](https://eliona-smart-building-assistant.github.io/open-api-docs/?https://raw.githubusercontent.com/eliona-smart-building-assistant/ms-graph-app/develop/openapi.yaml) shows details of the API
+- [API Reference](https://eliona-smart-building-assistant.github.io/open-api-docs/?https://raw.githubusercontent.com/eliona-smart-building-assistant/microsoft-365-app/develop/openapi.yaml) shows details of the API
 
 **Generation**: to generate api server stub see the Generation section below.
 

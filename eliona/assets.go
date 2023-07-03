@@ -18,9 +18,9 @@ package eliona
 import (
 	"context"
 	"fmt"
-	"ms-graph/apiserver"
-	"ms-graph/conf"
-	"ms-graph/msgraph"
+	"microsoft-365/apiserver"
+	"microsoft-365/conf"
+	"microsoft-365/msgraph"
 
 	api "github.com/eliona-smart-building-assistant/go-eliona-api-client/v2"
 	"github.com/eliona-smart-building-assistant/go-eliona/asset"
@@ -34,17 +34,17 @@ func CreateRoomsAssetsIfNecessary(config apiserver.Configuration, rooms []msgrap
 			config:                  config,
 			projectId:               projectId,
 			parentLocationalAssetId: nil,
-			identifier:              "ms_graph_root",
-			assetType:               "ms_graph_root",
-			name:                    "MS Graph",
-			description:             "Root asset for MS Graph places",
+			identifier:              "microsoft_365_root",
+			assetType:               "microsoft_365_root",
+			name:                    "Microsoft 365",
+			description:             "Root asset for Microsoft 365 places",
 		})
 		if err != nil {
 			return fmt.Errorf("upserting root asset: %v", err)
 		}
 		for _, room := range rooms {
 			id := room.EmailAddress
-			assetType := "ms_graph_room"
+			assetType := "microsoft_365_room"
 			name := room.DisplayName
 			_, _, err := upsertAsset(assetData{
 				config:                  config,

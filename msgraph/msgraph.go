@@ -3,7 +3,7 @@ package msgraph
 import (
 	"context"
 	"fmt"
-	"ms-graph/apiserver"
+	"microsoft-365/apiserver"
 
 	azcore "github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
@@ -252,11 +252,11 @@ func (g *GraphHelper) GetRooms(config apiserver.Configuration) ([]Room, error) {
 		room := convertToRoom(*msroom)
 		adheres, err := room.AdheresToFilter(config)
 		if err != nil {
-			log.Error("ms-graph", "checking if room adheres to a filter: %v", err)
+			log.Error("microsoft-365", "checking if room adheres to a filter: %v", err)
 			return false
 		}
 		if !adheres {
-			log.Debug("ms-graph", "Room %s skipped.", *room.EmailAddress)
+			log.Debug("microsoft-365", "Room %s skipped.", *room.EmailAddress)
 			return true
 		}
 		rooms = append(rooms, room)

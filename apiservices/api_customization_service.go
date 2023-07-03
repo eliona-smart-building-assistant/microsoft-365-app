@@ -17,7 +17,7 @@ package apiservices
 
 import (
 	"context"
-	"ms-graph/apiserver"
+	"microsoft-365/apiserver"
 	"net/http"
 )
 
@@ -34,7 +34,7 @@ func NewCustomizationApiService() apiserver.CustomizationApiServicer {
 
 // GetDashboardTemplateByName - Get a full dashboard template
 func (s *CustomizationApiService) GetDashboardTemplateByName(ctx context.Context, dashboardTemplateName string, projectId string) (apiserver.ImplResponse, error) {
-	if dashboardTemplateName == "MS Graph" {
+	if dashboardTemplateName == "Microsoft 365" {
 		return apiserver.ImplResponse{Code: http.StatusNotImplemented}, nil
 	} else {
 		return apiserver.ImplResponse{Code: http.StatusNotFound}, nil

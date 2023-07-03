@@ -1,4 +1,4 @@
-module ms-graph
+module microsoft-365
 
 go 1.20
 

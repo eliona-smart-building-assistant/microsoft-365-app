@@ -19,8 +19,8 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"ms-graph/apiserver"
-	"ms-graph/conf"
+	"microsoft-365/apiserver"
+	"microsoft-365/conf"
 )
 
 // ConfigurationApiService is a service that implements the logic for the ConfigurationApiServicer

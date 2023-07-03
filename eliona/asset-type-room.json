@@ -173,11 +173,11 @@
 	],
 	"custom": true,
 	"icon": "closable",
-	"name": "ms_graph_room",
+	"name": "microsoft_365_room",
 	"translation": {
-		"de": "MS Graph Raum",
-		"en": "MS Graph Room"
+		"de": "Microsoft 365 Raum",
+		"en": "Microsoft 365 Room"
 	},
 	"urldoc": "https://learn.microsoft.com/en-us/graph/api/resources/room?view=graph-rest-1.0",
-	"vendor": "MS Graph"
+	"vendor": "Microsoft 365"
 }

@@ -1,20 +1,20 @@
 {
-  "name": "ms-graph",
+  "name": "microsoft-365",
   "elionaMinVersion": "9.2.0",
   "displayName": {
-    "en": "MS Graph",
-    "de": "MS Graph"
+    "en": "Microsoft 365",
+    "de": "Microsoft 365"
   },
   "description": {
-    "en": "The MS Graph App allows access to MS Graph API.",
-    "de": "Die MS Graph App ermöglicht den Zugriff auf die MS Graph API."
+    "en": "The Microsoft 365 App allows access to Microsoft 365 API.",
+    "de": "Die Microsoft 365 App ermöglicht den Zugriff auf die Microsoft 365 API."
   },
   "dashboardTemplateNames": [
-    "MS Graph"
+    "Microsoft 365"
   ],
   "apiUrl": "v1",
   "apiSpecificationPath": "/version/openapi.json",
-  "documentationUrl": "https://doc.eliona.io/collection/eliona-apps/apps/ms-graph",
+  "documentationUrl": "https://doc.eliona.io/collection/eliona-apps/apps/microsoft-365",
   "useEnvironment": [
     "CONNECTION_STRING",
     "API_ENDPOINT",

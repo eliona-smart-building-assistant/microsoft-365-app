@@ -13,10 +13,10 @@
 --  DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 --  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-create schema if not exists ms_graph;
+create schema if not exists microsoft_365;
 
 -- Should be editable by eliona frontend.
-create table if not exists ms_graph.configuration
+create table if not exists microsoft_365.configuration
 (
 	id               bigserial primary key,
 	client_id        text not null,
@@ -32,10 +32,10 @@ create table if not exists ms_graph.configuration
 	project_ids      text[]
 );
 
-create table if not exists ms_graph.asset
+create table if not exists microsoft_365.asset
 (
 	id               bigserial primary key,
-	configuration_id bigserial not null references ms_graph.configuration(id),
+	configuration_id bigserial not null references microsoft_365.configuration(id),
 	project_id       text      not null,
 	global_asset_id  text      not null,
 	asset_id         integer

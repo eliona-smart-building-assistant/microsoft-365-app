@@ -2,10 +2,10 @@
 	"attributes": [],
 	"custom": true,
 	"icon": "building",
-	"name": "ms_graph_root",
+	"name": "microsoft_365_root",
 	"translation": {
-		"de": "MS Graph Root Asset",
-		"en": "MS Graph root asset"
+		"de": "Microsoft 365 Root Asset",
+		"en": "Microsoft 365 root asset"
 	},
-	"vendor": "MS Graph"
+	"vendor": "Microsoft 365"
 }

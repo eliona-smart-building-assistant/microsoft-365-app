@@ -21,7 +21,7 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"ms-graph/apiserver"
+	"microsoft-365/apiserver"
 
 	"github.com/eliona-smart-building-assistant/go-utils/common"
 	"github.com/eliona-smart-building-assistant/go-utils/log"

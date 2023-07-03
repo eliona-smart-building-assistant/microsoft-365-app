@@ -16,7 +16,7 @@
 package main
 
 import (
-	"ms-graph/eliona"
+	"microsoft-365/eliona"
 	"time"
 
 	"github.com/eliona-smart-building-assistant/go-eliona/app"

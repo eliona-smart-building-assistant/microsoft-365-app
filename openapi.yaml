@@ -17,34 +17,34 @@ openapi: 3.0.3
 
 info:
   version: 1.0.0
-  title: MS Graph App
-  description: API to access and configure the MS Graph App
+  title: Microsoft 365 App
+  description: API to access and configure the Microsoft 365 App
 externalDocs:
-  description: MS Graph App repository
-  url: https://github.com/eliona-smart-building-assistant/ms-graph-app
+  description: Microsoft 365 App repository
+  url: https://github.com/eliona-smart-building-assistant/microsoft-365-app
 servers:
-  - url: http://ms-graph/v1
+  - url: http://microsoft-365/v1
 
 tags:
   - name: Configuration
     description: Configure the app
     externalDocs:
-      url: https://github.com/eliona-smart-building-assistant/ms-graph-app
+      url: https://github.com/eliona-smart-building-assistant/microsoft-365-app
 
   - name: Version
     description: API version
     externalDocs:
-      url: https://github.com/eliona-smart-building-assistant/ms-graph-app
+      url: https://github.com/eliona-smart-building-assistant/microsoft-365-app
 
   - name: Customization
     description: Help to customize Eliona environment
     externalDocs:
-      url: https://github.com/eliona-smart-building-assistant/ms-graph-app
+      url: https://github.com/eliona-smart-building-assistant/microsoft-365-app
 
   - name: Proxy
-    description: MS Graph proxy - implemented standalone
+    description: Microsoft 365 proxy - implemented standalone
     externalDocs:
-      url: https://github.com/eliona-smart-building-assistant/ms-graph-app
+      url: https://github.com/eliona-smart-building-assistant/microsoft-365-app
 
 paths:
   /configurations:
@@ -129,7 +129,7 @@ paths:
           required: true
           schema:
             type: string
-            example: MS Graph
+            example: Microsoft 365
         - name: projectId
           in: query
           description: Define the project the dashboard should be
@@ -151,7 +151,7 @@ paths:
     get:
       tags:
         - Proxy
-      summary: A proxy server that passes requests to the MS Graph API
+      summary: A proxy server that passes requests to the Microsoft Graph API
       parameters:
         - name: ms-graph-path
           in: path
@@ -181,7 +181,7 @@ components:
   schemas:
     Configuration:
       type: object
-      description: Each configuration defines access to MS Graph.
+      description: Each configuration defines access to Microsoft 365.
       properties:
         id:
           type: integer
@@ -232,7 +232,7 @@ components:
           nullable: true
         projectIDs:
           type: array
-          description: List of Eliona project ids for which this device should collect data. For each project id all smart devices are automatically created as an asset in Eliona. The mapping to Eliona assets is stored as an asset mapping in the MS Graph app.
+          description: List of Eliona project ids for which this device should collect data. For each project id all smart devices are automatically created as an asset in Eliona. The mapping to Eliona assets is stored as an asset mapping in the Microsoft 365 app.
           nullable: true
           items:
             type: string
@@ -258,4 +258,4 @@ components:
           example: "name"
         regex:
           type: string
-          example: "^MS Graph.*$"
+          example: "^Microsoft 365.*$"

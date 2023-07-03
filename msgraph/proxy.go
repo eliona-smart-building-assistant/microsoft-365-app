@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"ms-graph/conf"
+	"microsoft-365/conf"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/eliona-smart-building-assistant/go-utils/log"
@@ -40,12 +40,12 @@ func (proxy *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if err := graph.InitializeGraph(config.ClientId, config.TenantId, *config.ClientSecret, *config.Username, *config.Password); err != nil {
-			log.Error("ms-graph", "initializing graph for user auth: %v", err)
+			log.Error("microsoft-365", "initializing graph for user auth: %v", err)
 			return
 		}
 
 		requestURL := "https://graph.microsoft.com/v1.0/" + r.URL.Path
-		log.Info("ms-graph", requestURL)
+		log.Info("microsoft-365", requestURL)
 
 		graphReq, err := http.NewRequest(r.Method, requestURL, r.Body)
 		if err != nil {

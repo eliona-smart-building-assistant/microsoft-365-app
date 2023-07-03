@@ -25,7 +25,7 @@ RUN go build -o ../app
 
 RUN DATE=$(date) && \
     GIT_COMMIT=$(git rev-list -1 HEAD) && \
-    go build -ldflags "-X 'ms-graph/apiservices.BuildTimestamp=$DATE' -X 'ms-graph/apiservices.GitCommit=$GIT_COMMIT'" -o ../app
+    go build -ldflags "-X 'microsoft-365/apiservices.BuildTimestamp=$DATE' -X 'microsoft-365/apiservices.GitCommit=$GIT_COMMIT'" -o ../app
 
 FROM eliona/base-alpine:latest-3.17 AS target
 
@@ -34,7 +34,7 @@ COPY conf/*.sql ./conf/
 COPY eliona/*.json ./eliona/
 COPY apiserver/openapi.json /
 
-ENV APPNAME=ms-graph
+ENV APPNAME=microsoft-365
 
 ENV TZ=Europe/Zurich
 CMD [ "/app" ]

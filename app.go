@@ -18,11 +18,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"ms-graph/apiserver"
-	"ms-graph/apiservices"
-	"ms-graph/conf"
-	"ms-graph/eliona"
-	"ms-graph/msgraph"
+	"microsoft-365/apiserver"
+	"microsoft-365/apiservices"
+	"microsoft-365/conf"
+	"microsoft-365/eliona"
+	"microsoft-365/msgraph"
 	"net/http"
 	"time"
 
@@ -86,13 +86,13 @@ func collectRooms(config apiserver.Configuration) error {
 		return fmt.Errorf("shouldn't happen: some values are nil")
 	}
 	if err := graph.InitializeGraph(config.ClientId, config.TenantId, *config.ClientSecret, *config.Username, *config.Password); err != nil {
-		log.Error("ms-graph", "initializing graph for user auth: %v", err)
+		log.Error("microsoft-365", "initializing graph for user auth: %v", err)
 		return err
 	}
 
 	rooms, err := graph.GetRooms(config)
 	if err != nil {
-		log.Error("ms-graph", "getting rooms: %v", err)
+		log.Error("microsoft-365", "getting rooms: %v", err)
 		return err
 	}
 	fmt.Printf("got %v rooms.\n", len(rooms))
