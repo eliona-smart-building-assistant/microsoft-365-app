@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"net/http"
+	"microsoft-365/apiserver"
 	"microsoft-365/conf"
+	"net/http"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/eliona-smart-building-assistant/go-utils/log"
@@ -23,7 +24,18 @@ type Response struct {
 }
 
 func (proxy *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	configs, err := conf.GetConfigs(context.Background())
+	// We are using headers to pass our own parameters, because extra query
+	// parameters are unacceptable for Graph API, while extra headers are
+	// ignored.
+	projectID := r.Header.Get("Eliona-Project-Id")
+
+	var configs []apiserver.Configuration
+	var err error
+	if projectID == "" {
+		configs, err = conf.GetEnabledConfigs(r.Context())
+	} else {
+		configs, err = conf.GetEnabledConfigsWithProjectId(r.Context(), projectID)
+	}
 	if err != nil {
 		log.Fatal("conf", "Couldn't read configs from DB: %v", err)
 		return

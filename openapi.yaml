@@ -160,8 +160,8 @@ paths:
           schema:
             type: string
             example: rooms/me
-        - name: projectId
-          in: query
+        - name: Eliona-Project-Id
+          in: header
           description: Define the project from which the configurations should be used.
           required: false
           schema:

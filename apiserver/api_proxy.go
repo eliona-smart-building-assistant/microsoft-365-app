@@ -61,11 +61,10 @@ func (c *ProxyApiController) Routes() Routes {
 // MsproxyMsGraphPathGet - A proxy server that passes requests to the Microsoft Graph API
 func (c *ProxyApiController) MsproxyMsGraphPathGet(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	query := r.URL.Query()
 	msGraphPathParam := params["ms-graph-path"]
 
-	projectIdParam := query.Get("projectId")
-	result, err := c.service.MsproxyMsGraphPathGet(r.Context(), msGraphPathParam, projectIdParam)
+	elionaProjectIdParam := r.Header.Get("Eliona-Project-Id")
+	result, err := c.service.MsproxyMsGraphPathGet(r.Context(), msGraphPathParam, elionaProjectIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)

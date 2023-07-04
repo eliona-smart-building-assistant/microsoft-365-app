@@ -26,6 +26,7 @@ import (
 	"github.com/eliona-smart-building-assistant/go-utils/common"
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/queries"
 )
 
 var ErrBadRequest = errors.New("bad request")
@@ -132,6 +133,48 @@ func GetConfigs(ctx context.Context) ([]apiserver.Configuration, error) {
 	if err != nil {
 		return nil, err
 	}
+	var apiConfigs []apiserver.Configuration
+	for _, dbConfig := range dbConfigs {
+		ac, err := apiConfigFromDbConfig(dbConfig)
+		if err != nil {
+			return nil, fmt.Errorf("creating API config from DB config: %v", err)
+		}
+		apiConfigs = append(apiConfigs, ac)
+	}
+	return apiConfigs, nil
+}
+
+func GetEnabledConfigs(ctx context.Context) ([]apiserver.Configuration, error) {
+	dbConfigs, err := appdb.Configurations(
+		appdb.ConfigurationWhere.Enable.EQ(null.BoolFrom(true)),
+	).AllG(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var apiConfigs []apiserver.Configuration
+	for _, dbConfig := range dbConfigs {
+		ac, err := apiConfigFromDbConfig(dbConfig)
+		if err != nil {
+			return nil, fmt.Errorf("creating API config from DB config: %v", err)
+		}
+		apiConfigs = append(apiConfigs, ac)
+	}
+	return apiConfigs, nil
+}
+
+func GetEnabledConfigsWithProjectId(ctx context.Context, projectId string) ([]apiserver.Configuration, error) {
+	var dbConfigs []*appdb.Configuration
+	q := fmt.Sprintf(`
+		SELECT *
+		FROM microsoft_365.configuration
+		WHERE
+			enabled = true AND
+			$1 = ANY (project_ids)
+	`)
+	if err := queries.RawG(q).BindG(ctx, dbConfigs); err != nil {
+		return nil, fmt.Errorf("fetching configuration: %v", err)
+	}
+
 	var apiConfigs []apiserver.Configuration
 	for _, dbConfig := range dbConfigs {
 		ac, err := apiConfigFromDbConfig(dbConfig)
