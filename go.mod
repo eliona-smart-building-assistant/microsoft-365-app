@@ -4,18 +4,16 @@ go 1.20
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.6.1
-	github.com/eliona-smart-building-assistant/go-eliona v1.9.7
+	github.com/eliona-smart-building-assistant/go-eliona v1.9.8
 	github.com/eliona-smart-building-assistant/go-utils v1.0.29
 	github.com/gorilla/mux v1.8.0
 	github.com/microsoft/kiota-authentication-azure-go v1.0.0
-	github.com/microsoftgraph/msgraph-sdk-go v1.8.0
+	github.com/microsoftgraph/msgraph-sdk-go v1.9.0
 	github.com/microsoftgraph/msgraph-sdk-go-core v1.0.0
 	github.com/volatiletech/null/v8 v8.1.2
 	github.com/volatiletech/sqlboiler/v4 v4.14.2
 	gopkg.in/yaml.v3 v3.0.1
 )
-
-replace github.com/eliona-smart-building-assistant/go-eliona => ../go-eliona
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.3.0 // indirect
@@ -29,10 +27,10 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
-	github.com/microsoft/kiota-abstractions-go v1.0.0 // indirect
+	github.com/microsoft/kiota-abstractions-go v1.1.0 // indirect
 	github.com/microsoft/kiota-http-go v1.0.0 // indirect
 	github.com/microsoft/kiota-serialization-form-go v1.0.0 // indirect
-	github.com/microsoft/kiota-serialization-json-go v1.0.2 // indirect
+	github.com/microsoft/kiota-serialization-json-go v1.0.3 // indirect
 	github.com/microsoft/kiota-serialization-text-go v1.0.0 // indirect
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
@@ -66,7 +64,7 @@ require (
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/spf13/cast v1.5.1 // indirect
 	github.com/volatiletech/inflect v0.0.1 // indirect
-	github.com/volatiletech/strmangle v0.0.4
+	github.com/volatiletech/strmangle v0.0.5
 	golang.org/x/crypto v0.10.0 // indirect
 	golang.org/x/text v0.10.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
