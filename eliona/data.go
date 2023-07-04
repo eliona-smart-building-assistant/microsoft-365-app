@@ -5,17 +5,21 @@ import (
 	"fmt"
 	"microsoft-365/apiserver"
 	"microsoft-365/conf"
-	"microsoft-365/msgraph"
 
 	"github.com/eliona-smart-building-assistant/go-eliona/asset"
 	"github.com/eliona-smart-building-assistant/go-utils/log"
 )
 
-func UpsertRoomData(config apiserver.Configuration, rooms []msgraph.Room) error {
+type Asset interface {
+	AssetType() string
+	Id() string
+}
+
+func UpsertAssetData(config apiserver.Configuration, assets []Asset) error {
 	for _, projectId := range *config.ProjectIDs {
-		for _, room := range rooms {
-			log.Debug("Eliona", "upserting data for room: config %d and room '%v'", config.Id, room.EmailAddress)
-			assetId, err := conf.GetAssetId(context.Background(), config, projectId, "microsoft_365_room"+fmt.Sprint(room.EmailAddress))
+		for _, a := range assets {
+			log.Debug("Eliona", "upserting data for asset: config %d and asset '%v'", config.Id, a.Id())
+			assetId, err := conf.GetAssetId(context.Background(), config, projectId, a.Id())
 			if err != nil {
 				return err
 			}
@@ -25,7 +29,7 @@ func UpsertRoomData(config apiserver.Configuration, rooms []msgraph.Room) error 
 
 			data := asset.Data{
 				AssetId: *assetId,
-				Data:    room,
+				Data:    a,
 			}
 			if asset.UpsertAssetDataIfAssetExists(data); err != nil {
 				return fmt.Errorf("upserting data: %v", err)

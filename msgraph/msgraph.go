@@ -203,6 +203,14 @@ type Room struct {
 	VideoDeviceName        *string         `eliona:"video_device_name,filterable" subtype:"info"`
 }
 
+func (room Room) AssetType() string {
+	return "microsoft_365_room"
+}
+
+func (room Room) Id() string {
+	return room.AssetType() + "_" + *room.EmailAddress
+}
+
 func (room *Room) AdheresToFilter(config apiserver.Configuration) (bool, error) {
 	f := apiFilterToCommonFilter(config.AssetFilter)
 	fp, err := utils.StructToMap(room)

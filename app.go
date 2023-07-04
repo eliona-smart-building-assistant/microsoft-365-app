@@ -101,7 +101,11 @@ func collectRooms(config apiserver.Configuration) error {
 		return err
 	}
 
-	if err := eliona.UpsertRoomData(config, rooms); err != nil {
+	assets := make([]eliona.Asset, len(rooms))
+	for i, v := range rooms {
+		assets[i] = v
+	}
+	if err := eliona.UpsertAssetData(config, assets); err != nil {
 		log.Error("eliona", "inserting room data into Eliona: %v", err)
 		return err
 	}
