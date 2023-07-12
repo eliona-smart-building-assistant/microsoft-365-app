@@ -70,3 +70,10 @@ For the database access [SQLBoiler](https://github.com/volatiletech/sqlboiler) i
 .\generate-db.cmd # Windows
 ./generate-db.sh # Linux
 ```
+
+
+## Potential improvements
+
+### Add timezone to config ###
+
+The schedules use central european time, so for other time zones we need to provide a way to configure that.

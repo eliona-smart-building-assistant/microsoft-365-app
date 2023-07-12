@@ -169,6 +169,16 @@
 				"de": "Video-Gerätename",
 				"en": "Video Device Name"
 			}
+		},
+		{
+			"enable": true,
+			"name": "on_schedule",
+			"subtype": "input",
+			"type": "device-info",
+			"translation": {
+				"de": "Derzeit im Zeitplan",
+				"en": "Currently on schedule"
+			}
 		}
 	],
 	"custom": true,

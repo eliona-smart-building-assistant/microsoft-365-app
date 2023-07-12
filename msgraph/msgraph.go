@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"microsoft-365/apiserver"
+	"time"
 
 	azcore "github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	abstractions "github.com/microsoft/kiota-abstractions-go"
 	auth "github.com/microsoft/kiota-authentication-azure-go"
 	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
@@ -201,6 +203,7 @@ type Room struct {
 	DisplayDeviceName      *string         `eliona:"display_device_name,filterable" subtype:"info"`
 	AudioDeviceName        *string         `eliona:"audio_device_name,filterable" subtype:"info"`
 	VideoDeviceName        *string         `eliona:"video_device_name,filterable" subtype:"info"`
+	OnSchedule             *string         `eliona:"on_schedule" subtype:"input"`
 }
 
 func (room Room) AssetType() string {
@@ -242,17 +245,17 @@ func (g *GraphHelper) GetRooms(config apiserver.Configuration) ([]Room, error) {
 	r, err := g.userClient.Places().GraphRoom().Get(context.Background(), nil)
 	if err != nil {
 		printOdataError(err)
-		return nil, fmt.Errorf("querying API: %+v", err)
+		return nil, fmt.Errorf("querying rooms API: %+v", err)
 	}
 
 	pageIterator, err := msgraphcore.NewPageIterator[*models.Room](
 		r, g.userClient.GetAdapter(), models.CreateRoomFromDiscriminatorValue,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("getting iterator: %v", err)
+		return nil, fmt.Errorf("getting room iterator: %v", err)
 	}
 
-	var rooms []Room
+	rooms := make(map[string]Room)
 	if err := pageIterator.Iterate(context.Background(), func(msroom *models.Room) bool {
 		if msroom == nil {
 			return false
@@ -267,14 +270,146 @@ func (g *GraphHelper) GetRooms(config apiserver.Configuration) ([]Room, error) {
 			log.Debug("microsoft-365", "Room %s skipped.", *room.EmailAddress)
 			return true
 		}
-		rooms = append(rooms, room)
+		rooms[*room.EmailAddress] = room
 		// Return true to continue the iteration
 		return true
 	}); err != nil {
-		return nil, fmt.Errorf("iterating: %v", err)
+		return nil, fmt.Errorf("iterating rooms: %v", err)
+	}
+	if len(rooms) == 0 {
+		return []Room{}, nil
 	}
 
+	rooms, err = g.fetchSchedules(rooms)
+	if err != nil {
+		return nil, fmt.Errorf("fetching schedules: %v", err)
+	}
+
+	var roomsSlice []Room
+	for _, room := range rooms {
+		roomsSlice = append(roomsSlice, room)
+	}
+	return roomsSlice, nil
+}
+
+func (g *GraphHelper) fetchSchedules(rooms map[string]Room) (map[string]Room, error) {
+	var addressList []string
+	for i := range rooms {
+		addressList = append(addressList, i)
+	}
+	timeZone := "W. Europe Standard Time"
+	headers := abstractions.NewRequestHeaders()
+	// If not specified, values returned are in UTC.
+	headers.Add("Prefer", fmt.Sprintf("outlook.timezone=\"%s\"", timeZone))
+
+	configuration := &users.ItemCalendarGetScheduleRequestBuilderPostRequestConfiguration{
+		Headers: headers,
+	}
+	requestBody := users.NewItemCalendarGetSchedulePostRequestBody()
+	requestBody.SetSchedules(addressList)
+
+	startTime := models.NewDateTimeTimeZone()
+	t1 := time.Now()
+	// The docs say "2006-01-02T15:04:05" is the correct format, but RFC3339
+	// is acceptable as well (but undocumented).
+	ts1 := t1.Format("2006-01-02T15:04:05")
+	startTime.SetDateTime(&ts1)
+	startTime.SetTimeZone(&timeZone)
+	requestBody.SetStartTime(startTime)
+
+	endTime := models.NewDateTimeTimeZone()
+
+	t2 := t1.Add(time.Hour)
+
+	ts2 := t2.Format("2006-01-02T15:04:05")
+	endTime.SetDateTime(&ts2)
+	endTime.SetTimeZone(&timeZone)
+	requestBody.SetEndTime(endTime)
+
+	availabilityViewInterval := int32(30)
+	requestBody.SetAvailabilityViewInterval(&availabilityViewInterval)
+
+	// POST https://graph.microsoft.com/v1.0/me/calendar/getSchedule
+	// Prefer: outlook.timezone="W. Europe Standard Time"
+	// Content-Type: application/json
+	//
+	// {
+	//     "schedules": ["small.table@z0vmd.onmicrosoft.com", "silent.room@z0vmd.onmicrosoft.com"],
+	//     "startTime": {
+	//         "dateTime": "2019-03-15T09:00:00",
+	//         "timeZone": "W. Europe Standard Time"
+	//     },
+	//     "endTime": {
+	//         "dateTime": "2019-03-16T18:00:00",
+	//         "timeZone": "W. Europe Standard Time"
+	//     },
+	//     "availabilityViewInterval": 60
+	// }
+
+	// ¯\_(ツ)_/¯
+	//
+	// While it is possible to get schedules of all the "users" in one query, the GetSchedule()
+	// endpoint is accessible only through some user entity. It does not matter which, though,
+	// so we can select one at random.
+	//
+	// Using Me() entity would be more elegant, but that entity is accessible only using
+	// delegated permissions.
+	//
+	// Note: this does not work with delegated permissions, so to test it in Graph Explorer,
+	// use the query above this comment.
+	randomAddress := addressList[0]
+	r, err := g.userClient.Users().ByUserId(randomAddress).Calendar().GetSchedule().Post(context.Background(), requestBody, configuration)
+	if err != nil {
+		printOdataError(err)
+		return nil, fmt.Errorf("querying calendar API: %+v", err)
+	}
+
+	pageIterator, err := msgraphcore.NewPageIterator[*models.ScheduleInformation](
+		r, g.userClient.GetAdapter(), models.CreateScheduleInformationFromDiscriminatorValue,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("getting schedule iterator: %v", err)
+	}
+
+	if err := pageIterator.Iterate(context.Background(), func(schedule *models.ScheduleInformation) bool {
+		if schedule == nil {
+			return false
+		}
+		sID := schedule.GetScheduleId()
+		if sID == nil {
+			log.Debug("microsoft-365", "Empty schedule ID")
+			return true
+		}
+		scheduleID := *sID
+		fmt.Println(scheduleID)
+
+		room := rooms[scheduleID]
+		scheduleItems := schedule.GetScheduleItems()
+		if scheduleItems == nil || len(scheduleItems) == 0 {
+			room.OnSchedule = nil
+		} else {
+			d := getScheduleItemableDescription(scheduleItems[0])
+			room.OnSchedule = &d
+		}
+		rooms[scheduleID] = room
+
+		// Return true to continue the iteration.
+		return true
+	}); err != nil {
+		return nil, fmt.Errorf("iterating schedules: %v", err)
+	}
 	return rooms, nil
+}
+
+func getScheduleItemableDescription(i models.ScheduleItemable) string {
+	var result string
+	if s := i.GetStatus(); s != nil {
+		result = s.String()
+	}
+	if s := i.GetSubject(); s != nil {
+		result = *s
+	}
+	return result
 }
 
 func convertToRoom(r models.Room) Room {
@@ -331,6 +466,6 @@ func printOdataError(err error) {
 			fmt.Printf("msg: %s\n", *terr.GetMessage())
 		}
 	default:
-		fmt.Printf("%T > error: %#v", err, err)
+		fmt.Printf("%T > error: %#v\n", err, err)
 	}
 }
