@@ -1,0 +1,43 @@
+{
+	"attributes": [
+		{
+			"enable": true,
+			"name": "email_address",
+			"subtype": "info",
+			"type": "device-info",
+			"translation": {
+				"de": "E-Mail-Adresse",
+				"en": "Email Address"
+			}
+		},
+		{
+			"enable": true,
+			"name": "display_name",
+			"subtype": "info",
+			"type": "device-info",
+			"translation": {
+				"de": "Anzeigename",
+				"en": "Display Name"
+			}
+		},
+		{
+			"enable": true,
+			"name": "on_schedule",
+			"subtype": "input",
+			"type": "device-info",
+			"translation": {
+				"de": "Im Zeitplan",
+				"en": "On Schedule"
+			}
+		}
+	],
+	"custom": true,
+	"icon": "closable",
+	"name": "microsoft_365_equipment",
+	"translation": {
+		"de": "Microsoft 365 Ausrüstung",
+		"en": "Microsoft 365 Equipment"
+	},
+	"urldoc": "https://learn.microsoft.com/en-us/graph/api/resources/user?view=graph-rest-1.0",
+	"vendor": "Microsoft"
+}
