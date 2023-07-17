@@ -292,6 +292,107 @@ func (g *GraphHelper) GetRooms(config apiserver.Configuration) ([]Room, error) {
 	return roomsSlice, nil
 }
 
+type Equipment struct {
+	EmailAddress *string `eliona:"email_address,filterable" subtype:"info"`
+	DisplayName  *string `eliona:"display_name,filterable" subtype:"info"`
+	OnSchedule   *string `eliona:"on_schedule" subtype:"input"`
+}
+
+func (equipment Equipment) AssetType() string {
+	return "microsoft_365_equipment"
+}
+
+func (equipment Equipment) Id() string {
+	return equipment.AssetType() + "_" + *equipment.EmailAddress
+}
+
+func (equipment *Equipment) AdheresToFilter(config apiserver.Configuration) (bool, error) {
+	f := apiFilterToCommonFilter(config.AssetFilter)
+	fp, err := utils.StructToMap(equipment)
+	if err != nil {
+		return false, fmt.Errorf("converting struct to map: %v", err)
+	}
+	adheres, err := common.Filter(f, fp)
+	if err != nil {
+		return false, err
+	}
+	return adheres, nil
+}
+
+func (g *GraphHelper) GetEquipment(config apiserver.Configuration) ([]Equipment, error) {
+	// It would be wonderful if this filter worked. For some reason, mailboxSettings
+	// can be accessed only user by user. See
+	// https://feedbackportal.microsoft.com/feedback/idea/65df37d3-8f21-ee11-a81c-002248510ddf
+	// for more info.
+	//
+	// f := "mailboxSettings/userPurpose eq 'equipment'"
+	// requestParameters := &users.UsersRequestBuilderGetQueryParameters{
+	// 	Select: []string{"id", "displayName", "mail", "mailboxSettings"},
+	// 	Filter: &f,
+	// }
+	r, err := g.userClient.Users().Get(context.Background(), nil)
+	if err != nil {
+		printOdataError(err)
+		return nil, fmt.Errorf("querying users API: %+v", err)
+	}
+
+	pageIterator, err := msgraphcore.NewPageIterator[*models.User](
+		r, g.userClient.GetAdapter(), models.CreateUserFromDiscriminatorValue,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("getting users iterator: %v", err)
+	}
+
+	equipment := make(map[string]Equipment)
+	if err := pageIterator.Iterate(context.Background(), func(msuser *models.User) bool {
+		if msuser == nil {
+			return false
+		}
+		name := *msuser.GetUserPrincipalName()
+		r, err := g.userClient.Users().ByUserId(name).MailboxSettings().Get(context.Background(), nil)
+		if err != nil {
+			printOdataError(err)
+			log.Error("microsoft-365", "querying users API: %v", err)
+			return true
+		}
+		purpose := r.GetUserPurpose()
+		if *purpose != models.EQUIPMENT_USERPURPOSE {
+			return true
+		}
+
+		e := convertToEquipment(*msuser)
+
+		adheres, err := e.AdheresToFilter(config)
+		if err != nil {
+			log.Error("microsoft-365", "checking if equipment adheres to a filter: %v", err)
+			return false
+		}
+		if !adheres {
+			log.Debug("microsoft-365", "Room %s skipped.", *e.EmailAddress)
+			return true
+		}
+		equipment[*e.EmailAddress] = e
+		// Return true to continue the iteration
+		return true
+	}); err != nil {
+		return nil, fmt.Errorf("iterating equipment: %v", err)
+	}
+	if len(equipment) == 0 {
+		return []Equipment{}, nil
+	}
+
+	// equipment, err = g.fetchSchedules(equipment)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("fetching schedules: %v", err)
+	// }
+
+	var equipmentSlice []Equipment
+	for _, e := range equipment {
+		equipmentSlice = append(equipmentSlice, e)
+	}
+	return equipmentSlice, nil
+}
+
 func (g *GraphHelper) fetchSchedules(rooms map[string]Room) (map[string]Room, error) {
 	var addressList []string
 	for i := range rooms {
@@ -454,6 +555,13 @@ func convertToRoom(r models.Room) Room {
 		}
 	}
 	return room
+}
+
+func convertToEquipment(u models.User) Equipment {
+	return Equipment{
+		DisplayName:  u.GetDisplayName(),
+		EmailAddress: u.GetUserPrincipalName(),
+	}
 }
 
 func printOdataError(err error) {
