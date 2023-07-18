@@ -185,6 +185,11 @@ func mapBookingType(bt *models.BookingType) BookingType {
 	}
 }
 
+type GraphAsset interface {
+	getEmailAddress() *string
+	setOnSchedule(*string)
+}
+
 type Room struct {
 	Address                PhysicalAddress `eliona:"address,filterable" subtype:"info"`
 	DisplayName            *string         `eliona:"display_name,filterable" subtype:"info"`
@@ -227,6 +232,14 @@ func (room *Room) AdheresToFilter(config apiserver.Configuration) (bool, error) 
 	return adheres, nil
 }
 
+func (r *Room) getEmailAddress() *string {
+	return r.EmailAddress
+}
+
+func (r *Room) setOnSchedule(s *string) {
+	r.OnSchedule = s
+}
+
 func apiFilterToCommonFilter(input [][]apiserver.FilterRule) [][]common.FilterRule {
 	result := make([][]common.FilterRule, len(input))
 	for i := 0; i < len(input); i++ {
@@ -255,7 +268,7 @@ func (g *GraphHelper) GetRooms(config apiserver.Configuration) ([]Room, error) {
 		return nil, fmt.Errorf("getting room iterator: %v", err)
 	}
 
-	rooms := make(map[string]Room)
+	rooms := make(map[string]*Room)
 	if err := pageIterator.Iterate(context.Background(), func(msroom *models.Room) bool {
 		if msroom == nil {
 			return false
@@ -270,7 +283,7 @@ func (g *GraphHelper) GetRooms(config apiserver.Configuration) ([]Room, error) {
 			log.Debug("microsoft-365", "Room %s skipped.", *room.EmailAddress)
 			return true
 		}
-		rooms[*room.EmailAddress] = room
+		rooms[*room.EmailAddress] = &room
 		// Return true to continue the iteration
 		return true
 	}); err != nil {
@@ -280,14 +293,14 @@ func (g *GraphHelper) GetRooms(config apiserver.Configuration) ([]Room, error) {
 		return []Room{}, nil
 	}
 
-	rooms, err = g.fetchSchedules(rooms)
+	rooms, err = fetchSchedules(g, rooms)
 	if err != nil {
 		return nil, fmt.Errorf("fetching schedules: %v", err)
 	}
 
 	var roomsSlice []Room
 	for _, room := range rooms {
-		roomsSlice = append(roomsSlice, room)
+		roomsSlice = append(roomsSlice, *room)
 	}
 	return roomsSlice, nil
 }
@@ -319,6 +332,14 @@ func (equipment *Equipment) AdheresToFilter(config apiserver.Configuration) (boo
 	return adheres, nil
 }
 
+func (e *Equipment) getEmailAddress() *string {
+	return e.EmailAddress
+}
+
+func (e *Equipment) setOnSchedule(s *string) {
+	e.OnSchedule = s
+}
+
 func (g *GraphHelper) GetEquipment(config apiserver.Configuration) ([]Equipment, error) {
 	// It would be wonderful if this filter worked. For some reason, mailboxSettings
 	// can be accessed only user by user. See
@@ -343,7 +364,7 @@ func (g *GraphHelper) GetEquipment(config apiserver.Configuration) ([]Equipment,
 		return nil, fmt.Errorf("getting users iterator: %v", err)
 	}
 
-	equipment := make(map[string]Equipment)
+	equipment := make(map[string]*Equipment)
 	if err := pageIterator.Iterate(context.Background(), func(msuser *models.User) bool {
 		if msuser == nil {
 			return false
@@ -371,7 +392,7 @@ func (g *GraphHelper) GetEquipment(config apiserver.Configuration) ([]Equipment,
 			log.Debug("microsoft-365", "Room %s skipped.", *e.EmailAddress)
 			return true
 		}
-		equipment[*e.EmailAddress] = e
+		equipment[*e.EmailAddress] = &e
 		// Return true to continue the iteration
 		return true
 	}); err != nil {
@@ -381,19 +402,19 @@ func (g *GraphHelper) GetEquipment(config apiserver.Configuration) ([]Equipment,
 		return []Equipment{}, nil
 	}
 
-	// equipment, err = g.fetchSchedules(equipment)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("fetching schedules: %v", err)
-	// }
+	equipment, err = fetchSchedules(g, equipment)
+	if err != nil {
+		return nil, fmt.Errorf("fetching schedules: %v", err)
+	}
 
 	var equipmentSlice []Equipment
 	for _, e := range equipment {
-		equipmentSlice = append(equipmentSlice, e)
+		equipmentSlice = append(equipmentSlice, *e)
 	}
 	return equipmentSlice, nil
 }
 
-func (g *GraphHelper) fetchSchedules(rooms map[string]Room) (map[string]Room, error) {
+func fetchSchedules[T GraphAsset](g *GraphHelper, rooms map[string]T) (map[string]T, error) {
 	var addressList []string
 	for i := range rooms {
 		addressList = append(addressList, i)
@@ -487,10 +508,10 @@ func (g *GraphHelper) fetchSchedules(rooms map[string]Room) (map[string]Room, er
 		room := rooms[scheduleID]
 		scheduleItems := schedule.GetScheduleItems()
 		if scheduleItems == nil || len(scheduleItems) == 0 {
-			room.OnSchedule = nil
+			room.setOnSchedule(nil)
 		} else {
 			d := getScheduleItemableDescription(scheduleItems[0])
-			room.OnSchedule = &d
+			room.setOnSchedule(&d)
 		}
 		rooms[scheduleID] = room
 
