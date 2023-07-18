@@ -68,7 +68,7 @@ func collectData() {
 		common.RunOnceWithParam(func(config apiserver.Configuration) {
 			log.Info("main", "Collecting %d started", *config.Id)
 
-			if err := collectRooms(config); err != nil {
+			if err := collectResources(config); err != nil {
 				return // Error is handled in the method itself.
 			}
 
@@ -79,7 +79,7 @@ func collectData() {
 	}
 }
 
-func collectRooms(config apiserver.Configuration) error {
+func collectResources(config apiserver.Configuration) error {
 	graph := msgraph.NewGraphHelper()
 	if config.ClientSecret == nil || config.Username == nil || config.Password == nil {
 		log.Error("conf", "Shouldn't happen: some values are nil")
@@ -105,6 +105,22 @@ func collectRooms(config apiserver.Configuration) error {
 	for i, v := range rooms {
 		assets[i] = v
 	}
+
+	equipment, err := graph.GetEquipment(config)
+	if err != nil {
+		log.Error("microsoft-365", "getting equipment: %v", err)
+		return err
+	}
+	fmt.Printf("got %v equipment.\n", len(equipment))
+	if err := eliona.CreateEquipmentAssetsIfNecessary(config, equipment); err != nil {
+		log.Error("eliona", "creating equipment assets: %v", err)
+		return err
+	}
+
+	for _, v := range equipment {
+		assets = append(assets, v)
+	}
+
 	if err := eliona.UpsertAssetData(config, assets); err != nil {
 		log.Error("eliona", "inserting room data into Eliona: %v", err)
 		return err

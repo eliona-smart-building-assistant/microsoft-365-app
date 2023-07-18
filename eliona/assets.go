@@ -30,15 +30,7 @@ import (
 
 func CreateRoomsAssetsIfNecessary(config apiserver.Configuration, rooms []msgraph.Room) error {
 	for _, projectId := range conf.ProjIds(config) {
-		_, rootAssetID, err := upsertAsset(assetData{
-			config:                  config,
-			projectId:               projectId,
-			parentLocationalAssetId: nil,
-			identifier:              "microsoft_365_root",
-			assetType:               "microsoft_365_root",
-			name:                    "Microsoft 365",
-			description:             "Root asset for Microsoft 365 places",
-		})
+		rootAssetID, err := upsertRootAsset(config, projectId)
 		if err != nil {
 			return fmt.Errorf("upserting root asset: %v", err)
 		}
@@ -61,6 +53,46 @@ func CreateRoomsAssetsIfNecessary(config apiserver.Configuration, rooms []msgrap
 		}
 	}
 	return nil
+}
+
+func CreateEquipmentAssetsIfNecessary(config apiserver.Configuration, equipmentList []msgraph.Equipment) error {
+	for _, projectId := range conf.ProjIds(config) {
+		rootAssetID, err := upsertRootAsset(config, projectId)
+		if err != nil {
+			return fmt.Errorf("upserting root asset: %v", err)
+		}
+		for _, equipment := range equipmentList {
+			id := equipment.EmailAddress
+			assetType := "microsoft_365_equipment"
+			name := equipment.DisplayName
+			_, _, err := upsertAsset(assetData{
+				config:                  config,
+				projectId:               projectId,
+				parentLocationalAssetId: &rootAssetID,
+				identifier:              fmt.Sprintf("%s_%s", assetType, *id),
+				assetType:               assetType,
+				name:                    *name,
+				description:             fmt.Sprintf("%s (%v)", *name, *id),
+			})
+			if err != nil {
+				return fmt.Errorf("upserting equipment %s: %v", *id, err)
+			}
+		}
+	}
+	return nil
+}
+
+func upsertRootAsset(config apiserver.Configuration, projectId string) (int32, error) {
+	_, rootAssetID, err := upsertAsset(assetData{
+		config:                  config,
+		projectId:               projectId,
+		parentLocationalAssetId: nil,
+		identifier:              "microsoft_365_root",
+		assetType:               "microsoft_365_root",
+		name:                    "Microsoft 365",
+		description:             "Root asset for Microsoft 365 places",
+	})
+	return rootAssetID, err
 }
 
 type assetData struct {
