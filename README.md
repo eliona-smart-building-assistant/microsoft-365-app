@@ -46,10 +46,26 @@ The app provides its own API to access configuration data and other functions. T
 **Generation**: to generate api server stub see the Generation section below.
 
 
-### Eliona ###
+### Eliona assets ###
 
-<mark>Todo: Describe all the data the app writes to eliona</mark>
+This app creates Eliona asset types and attribute sets during initialization.
 
+The data is written for rooms and equipment accessible to the Azure user, structured into different subtypes of Eliona assets. The following subtypes are used:
+
+- `Info`: Static data which provides information about rooms and equipment.
+- `Input`: Current reservation status.
+
+### Continuous asset creation ###
+
+Assets for all rooms and equipment are created automatically when the configuration is added.
+
+To select which assets to create, a filter could be specified in config. The schema of the filter is defined in the `openapi.yaml` file.
+
+Possible filter parameters are the field tags for `eliona` in the `msgraph.Room` and `msgraph.Equipment` structs.
+
+### Dashboard ###
+
+An example dashboard meant for a quick start or showcasing the apps abilities can be obtained by accessing the dashboard endpoint defined in the `openapi.yaml` file.
 
 ## Tools
 
@@ -72,7 +88,7 @@ For the database access [SQLBoiler](https://github.com/volatiletech/sqlboiler) i
 ```
 
 
-## Potential improvements
+## Further development
 
 ### Add timezone to config ###
 
