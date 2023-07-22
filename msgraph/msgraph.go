@@ -26,6 +26,7 @@ type GraphHelper struct {
 	credential      azcore.TokenCredential
 	userClient      *msgraphsdk.GraphServiceClient
 	graphUserScopes []string
+	isDelegated     bool
 }
 
 func NewGraphHelper() *GraphHelper {
@@ -46,6 +47,7 @@ func (g *GraphHelper) InitializeGraph(clientId, tenantId, clientSecret, username
 			return fmt.Errorf("creating the username/password credential: %v", err)
 		}
 		g.credential = cred
+		g.isDelegated = true
 	} else {
 		cred, err := azidentity.NewClientSecretCredential(
 			tenantId,
@@ -57,6 +59,7 @@ func (g *GraphHelper) InitializeGraph(clientId, tenantId, clientSecret, username
 			return fmt.Errorf("creating the device code credential: %v", err)
 		}
 		g.credential = cred
+		g.isDelegated = false
 	}
 
 	authProvider, err := auth.NewAzureIdentityAuthenticationProviderWithScopes(g.credential, g.graphUserScopes)
@@ -477,13 +480,24 @@ func fetchSchedules[T GraphAsset](g *GraphHelper, rooms map[string]T) (map[strin
 	// Using Me() entity would be more elegant, but that entity is accessible only using
 	// delegated permissions.
 	//
-	// Note: this does not work with delegated permissions, so to test it in Graph Explorer,
-	// use the query above this comment.
-	randomAddress := addressList[0]
-	r, err := g.userClient.Users().ByUserId(randomAddress).Calendar().GetSchedule().Post(context.Background(), requestBody, configuration)
-	if err != nil {
-		printOdataError(err)
-		return nil, fmt.Errorf("querying calendar API: %+v", err)
+	// Note: with delegated permissions, only the Me() endpoint is accessible so to test it in
+	// Graph Explorer, use the query above this comment.
+	var r users.ItemCalendarGetScheduleResponseable
+	if g.isDelegated {
+		var err error
+		r, err = g.userClient.Me().Calendar().GetSchedule().Post(context.Background(), requestBody, configuration)
+		if err != nil {
+			printOdataError(err)
+			return nil, fmt.Errorf("querying calendar API via delegated permission: %+v", err)
+		}
+	} else {
+		randomAddress := addressList[0]
+		var err error
+		r, err = g.userClient.Users().ByUserId(randomAddress).Calendar().GetSchedule().Post(context.Background(), requestBody, configuration)
+		if err != nil {
+			printOdataError(err)
+			return nil, fmt.Errorf("querying calendar API via app permission: %+v", err)
+		}
 	}
 
 	pageIterator, err := msgraphcore.NewPageIterator[*models.ScheduleInformation](
