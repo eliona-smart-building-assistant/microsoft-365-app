@@ -357,7 +357,7 @@ func (g *GraphHelper) GetEquipment(config apiserver.Configuration) ([]Equipment,
 	r, err := g.userClient.Users().Get(context.Background(), nil)
 	if err != nil {
 		printOdataError(err)
-		return nil, fmt.Errorf("querying users API: %+v", err)
+		return nil, fmt.Errorf("querying users list API: %+v", err)
 	}
 
 	pageIterator, err := msgraphcore.NewPageIterator[*models.User](
