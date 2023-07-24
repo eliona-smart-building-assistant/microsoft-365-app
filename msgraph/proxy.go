@@ -32,9 +32,9 @@ func (proxy *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var configs []apiserver.Configuration
 	var err error
 	if projectID == "" {
-		configs, err = conf.GetEnabledConfigs(r.Context())
+		configs, err = conf.GetConfigsForProxy(r.Context())
 	} else {
-		configs, err = conf.GetEnabledConfigsWithProjectId(r.Context(), projectID)
+		configs, err = conf.GetConfigsForProxyWithProjectId(r.Context(), projectID)
 	}
 	if err != nil {
 		log.Fatal("conf", "Couldn't read configs from DB: %v", err)

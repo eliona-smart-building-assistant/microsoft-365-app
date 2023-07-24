@@ -271,6 +271,14 @@ components:
           type: string
           description: Password
           nullable: true
+        forEliona:
+          type: boolean
+          description: Indicates whether the config should be used for asset creation
+          default: true
+        forProxy:
+          type: boolean
+          description: Indicates whether the config should be used for app frontend and proxy
+          default: true
         enable:
           type: boolean
           description: Flag to enable or disable fetching from this API

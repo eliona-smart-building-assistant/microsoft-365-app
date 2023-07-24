@@ -30,6 +30,12 @@ type Configuration struct {
 	// Password
 	Password *string `json:"password,omitempty"`
 
+	// Indicates whether the config should be used for asset creation
+	ForEliona bool `json:"forEliona,omitempty"`
+
+	// Indicates whether the config should be used for app frontend and proxy
+	ForProxy bool `json:"forProxy,omitempty"`
+
 	// Flag to enable or disable fetching from this API
 	Enable *bool `json:"enable,omitempty"`
 

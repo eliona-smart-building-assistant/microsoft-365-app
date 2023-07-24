@@ -31,6 +31,8 @@ type Configuration struct {
 	TenantID        string            `boil:"tenant_id" json:"tenant_id" toml:"tenant_id" yaml:"tenant_id"`
 	Username        string            `boil:"username" json:"username" toml:"username" yaml:"username"`
 	Password        string            `boil:"password" json:"password" toml:"password" yaml:"password"`
+	ForEliona       bool              `boil:"for_eliona" json:"for_eliona" toml:"for_eliona" yaml:"for_eliona"`
+	ForProxy        bool              `boil:"for_proxy" json:"for_proxy" toml:"for_proxy" yaml:"for_proxy"`
 	RefreshInterval int32             `boil:"refresh_interval" json:"refresh_interval" toml:"refresh_interval" yaml:"refresh_interval"`
 	RequestTimeout  int32             `boil:"request_timeout" json:"request_timeout" toml:"request_timeout" yaml:"request_timeout"`
 	AssetFilter     null.JSON         `boil:"asset_filter" json:"asset_filter,omitempty" toml:"asset_filter" yaml:"asset_filter,omitempty"`
@@ -49,6 +51,8 @@ var ConfigurationColumns = struct {
 	TenantID        string
 	Username        string
 	Password        string
+	ForEliona       string
+	ForProxy        string
 	RefreshInterval string
 	RequestTimeout  string
 	AssetFilter     string
@@ -62,6 +66,8 @@ var ConfigurationColumns = struct {
 	TenantID:        "tenant_id",
 	Username:        "username",
 	Password:        "password",
+	ForEliona:       "for_eliona",
+	ForProxy:        "for_proxy",
 	RefreshInterval: "refresh_interval",
 	RequestTimeout:  "request_timeout",
 	AssetFilter:     "asset_filter",
@@ -77,6 +83,8 @@ var ConfigurationTableColumns = struct {
 	TenantID        string
 	Username        string
 	Password        string
+	ForEliona       string
+	ForProxy        string
 	RefreshInterval string
 	RequestTimeout  string
 	AssetFilter     string
@@ -90,6 +98,8 @@ var ConfigurationTableColumns = struct {
 	TenantID:        "configuration.tenant_id",
 	Username:        "configuration.username",
 	Password:        "configuration.password",
+	ForEliona:       "configuration.for_eliona",
+	ForProxy:        "configuration.for_proxy",
 	RefreshInterval: "configuration.refresh_interval",
 	RequestTimeout:  "configuration.request_timeout",
 	AssetFilter:     "configuration.asset_filter",
@@ -99,6 +109,15 @@ var ConfigurationTableColumns = struct {
 }
 
 // Generated where
+
+type whereHelperbool struct{ field string }
+
+func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
 type whereHelperint32 struct{ field string }
 
@@ -204,6 +223,8 @@ var ConfigurationWhere = struct {
 	TenantID        whereHelperstring
 	Username        whereHelperstring
 	Password        whereHelperstring
+	ForEliona       whereHelperbool
+	ForProxy        whereHelperbool
 	RefreshInterval whereHelperint32
 	RequestTimeout  whereHelperint32
 	AssetFilter     whereHelpernull_JSON
@@ -217,6 +238,8 @@ var ConfigurationWhere = struct {
 	TenantID:        whereHelperstring{field: "\"microsoft_365\".\"configuration\".\"tenant_id\""},
 	Username:        whereHelperstring{field: "\"microsoft_365\".\"configuration\".\"username\""},
 	Password:        whereHelperstring{field: "\"microsoft_365\".\"configuration\".\"password\""},
+	ForEliona:       whereHelperbool{field: "\"microsoft_365\".\"configuration\".\"for_eliona\""},
+	ForProxy:        whereHelperbool{field: "\"microsoft_365\".\"configuration\".\"for_proxy\""},
 	RefreshInterval: whereHelperint32{field: "\"microsoft_365\".\"configuration\".\"refresh_interval\""},
 	RequestTimeout:  whereHelperint32{field: "\"microsoft_365\".\"configuration\".\"request_timeout\""},
 	AssetFilter:     whereHelpernull_JSON{field: "\"microsoft_365\".\"configuration\".\"asset_filter\""},
@@ -253,9 +276,9 @@ func (r *configurationR) GetAssets() AssetSlice {
 type configurationL struct{}
 
 var (
-	configurationAllColumns            = []string{"id", "client_id", "client_secret", "tenant_id", "username", "password", "refresh_interval", "request_timeout", "asset_filter", "active", "enable", "project_ids"}
+	configurationAllColumns            = []string{"id", "client_id", "client_secret", "tenant_id", "username", "password", "for_eliona", "for_proxy", "refresh_interval", "request_timeout", "asset_filter", "active", "enable", "project_ids"}
 	configurationColumnsWithoutDefault = []string{"client_id", "client_secret", "tenant_id", "username", "password"}
-	configurationColumnsWithDefault    = []string{"id", "refresh_interval", "request_timeout", "asset_filter", "active", "enable", "project_ids"}
+	configurationColumnsWithDefault    = []string{"id", "for_eliona", "for_proxy", "refresh_interval", "request_timeout", "asset_filter", "active", "enable", "project_ids"}
 	configurationPrimaryKeyColumns     = []string{"id"}
 	configurationGeneratedColumns      = []string{}
 )

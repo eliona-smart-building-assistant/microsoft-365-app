@@ -24,6 +24,8 @@ create table if not exists microsoft_365.configuration
 	tenant_id        text not null,
 	username         text not null,
 	password         text not null,
+	for_eliona       boolean not null default false,
+	for_proxy        boolean not null default false,
 	refresh_interval integer not null default 60,
 	request_timeout  integer not null default 120,
 	asset_filter     json,

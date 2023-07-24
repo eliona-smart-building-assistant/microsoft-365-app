@@ -33,7 +33,7 @@ import (
 
 // collectData is the main app function which is called periodically
 func collectData() {
-	configs, err := conf.GetConfigs(context.Background())
+	configs, err := conf.GetConfigsForEliona(context.Background())
 	if err != nil {
 		log.Fatal("conf", "Couldn't read configs from DB: %v", err)
 		return
