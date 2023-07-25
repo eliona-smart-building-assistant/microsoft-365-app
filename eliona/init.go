@@ -29,9 +29,6 @@ func InitEliona(connection db.Connection) error {
 	if err := asset.InitAssetTypeFile("eliona/asset-type-room.json")(connection); err != nil {
 		return fmt.Errorf("init room asset type: %v", err)
 	}
-	if err := asset.InitAssetTypeFile("eliona/asset-type-room-list.json")(connection); err != nil {
-		return fmt.Errorf("init room list asset type: %v", err)
-	}
 	if err := asset.InitAssetTypeFile("eliona/asset-type-equipment.json")(connection); err != nil {
 		return fmt.Errorf("init equipment asset type: %v", err)
 	}
