@@ -19,9 +19,9 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"microsoft-365/apiserver"
 	"net/http"
 	"os"
-	"microsoft-365/apiserver"
 
 	"github.com/eliona-smart-building-assistant/go-utils/common"
 	"github.com/eliona-smart-building-assistant/go-utils/log"

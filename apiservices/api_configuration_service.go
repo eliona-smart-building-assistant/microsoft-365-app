@@ -18,9 +18,9 @@ package apiservices
 import (
 	"context"
 	"errors"
-	"net/http"
 	"microsoft-365/apiserver"
 	"microsoft-365/conf"
+	"net/http"
 )
 
 // ConfigurationApiService is a service that implements the logic for the ConfigurationApiServicer
