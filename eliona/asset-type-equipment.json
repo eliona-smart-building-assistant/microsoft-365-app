@@ -12,16 +12,6 @@
 		},
 		{
 			"enable": true,
-			"name": "display_name",
-			"subtype": "info",
-			"type": "device-info",
-			"translation": {
-				"de": "Anzeigename",
-				"en": "Display Name"
-			}
-		},
-		{
-			"enable": true,
 			"name": "on_schedule",
 			"subtype": "input",
 			"type": "device-info",
