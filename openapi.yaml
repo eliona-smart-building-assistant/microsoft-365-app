@@ -190,13 +190,13 @@ paths:
             type: string
             example: 99
       responses:
-        200:
+        "200":
           description: Successfully returned dashboard template
           content:
             application/json:
               schema:
                 $ref: "https://raw.githubusercontent.com/eliona-smart-building-assistant/eliona-api/main/openapi.yaml#/components/schemas/Dashboard"
-        404:
+        "404":
           description: Template name not found
 
   /msproxy/{ms-graph-path}:
@@ -220,13 +220,13 @@ paths:
             type: string
             example: 99
       responses:
-        200:
+        "200":
           description: Successfully returned API responses
           content:
             application/json:
               schema:
                 type: object
-        404:
+        "404":
           description: Template name not found
 
 components:

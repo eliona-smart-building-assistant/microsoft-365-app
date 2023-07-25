@@ -127,6 +127,8 @@ github.com/dnaeon/go-vcr v1.1.0/go.mod h1:M7tiix8f0r6mKKJ3Yq/kqU1OYf3MnfmBWVbPx/
 github.com/dnaeon/go-vcr v1.2.0 h1:zHCHvJYTMh1N7xnV7zf1m1GPBF9Ad0Jk/whtQ1663qI=
 github.com/dnaeon/go-vcr v1.2.0/go.mod h1:R4UdLID7HZT3taECzJs4YgbbH6PIGXB6W/sc5OLb6RQ=
 github.com/dustin/go-humanize v1.0.0/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
+github.com/eliona-smart-building-assistant/app-integration-tests v0.0.5 h1:syohiP7FaNhWRAE+fTBLqN6B4T2mrWt2WNikM/Wq4Sc=
+github.com/eliona-smart-building-assistant/app-integration-tests v0.0.5/go.mod h1:D5fA+9HOneH/CuBU0W0fkPb16QERDA9+N7eejKPS6rI=
 github.com/eliona-smart-building-assistant/go-eliona v1.9.9 h1:SeUnCQXHXU9P6JAdt/brgFsykLGvwULHndjvLXhtjMg=
 github.com/eliona-smart-building-assistant/go-eliona v1.9.9/go.mod h1:A07FQWo1CIKsKOSxDe1Cs5hd3HU2zcM+qw4RcqJCvrw=
 github.com/eliona-smart-building-assistant/go-eliona-api-client/v2 v2.4.20 h1:qygWkm9ACQz3eqD0r55VYjcThl/T4/ngdiSBvRhWY4E=

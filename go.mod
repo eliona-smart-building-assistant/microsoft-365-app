@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.7.0
+	github.com/eliona-smart-building-assistant/app-integration-tests v0.0.5
 	github.com/eliona-smart-building-assistant/go-eliona v1.9.9
 	github.com/eliona-smart-building-assistant/go-utils v1.0.32
 	github.com/gorilla/mux v1.8.0
