@@ -207,27 +207,87 @@ paths:
       parameters:
         - name: ms-graph-path
           in: path
-          description: ...
+          description: A path in MS Graph this request will be forwarded to.
           required: true
           schema:
             type: string
             example: rooms/me
-        - name: Eliona-Project-Id
+        - name: eliona-project-id
           in: header
-          description: Define the project from which the configurations should be used.
+          description: The project from which the configurations should be used.
           required: false
           schema:
             type: string
             example: 99
       responses:
         "200":
-          description: Successfully returned API responses
-          content:
-            application/json:
-              schema:
-                type: object
-        "404":
-          description: Template name not found
+          description: Successfully got
+    post:
+      tags:
+        - Proxy
+      summary: A proxy server that passes requests to the Microsoft Graph API
+      parameters:
+        - name: ms-graph-path
+          in: path
+          description: A path in MS Graph this request will be forwarded to.
+          required: true
+          schema:
+            type: string
+            example: rooms/me
+        - name: eliona-project-id
+          in: header
+          description: The project from which the configurations should be used.
+          required: false
+          schema:
+            type: string
+            example: 99
+      responses:
+        "200":
+          description: Successfully posted
+    put:
+      tags:
+        - Proxy
+      summary: A proxy server that passes requests to the Microsoft Graph API
+      parameters:
+        - name: ms-graph-path
+          in: path
+          description: A path in MS Graph this request will be forwarded to.
+          required: true
+          schema:
+            type: string
+            example: rooms/me
+        - name: eliona-project-id
+          in: header
+          description: The project from which the configurations should be used.
+          required: false
+          schema:
+            type: string
+            example: 99
+      responses:
+        "200":
+          description: Successfully put
+    delete:
+      tags:
+        - Proxy
+      summary: A proxy server that passes requests to the Microsoft Graph API
+      parameters:
+        - name: ms-graph-path
+          in: path
+          description: A path in MS Graph this request will be forwarded to.
+          required: true
+          schema:
+            type: string
+            example: rooms/me
+        - name: eliona-project-id
+          in: header
+          description: The project from which the configurations should be used.
+          required: false
+          schema:
+            type: string
+            example: 99
+      responses:
+        "200":
+          description: Successfully deleted
 
 components:
   parameters:

@@ -36,7 +36,10 @@ type CustomizationApiRouter interface {
 // The ProxyApiRouter implementation should parse necessary information from the http request,
 // pass the data to a ProxyApiServicer to perform the required actions, then write the service results to the http response.
 type ProxyApiRouter interface {
+	MsproxyMsGraphPathDelete(http.ResponseWriter, *http.Request)
 	MsproxyMsGraphPathGet(http.ResponseWriter, *http.Request)
+	MsproxyMsGraphPathPost(http.ResponseWriter, *http.Request)
+	MsproxyMsGraphPathPut(http.ResponseWriter, *http.Request)
 }
 
 // VersionApiRouter defines the required methods for binding the api requests to a responses for the VersionApi
@@ -72,7 +75,10 @@ type CustomizationApiServicer interface {
 // while the service implementation can be ignored with the .openapi-generator-ignore file
 // and updated with the logic required for the API.
 type ProxyApiServicer interface {
+	MsproxyMsGraphPathDelete(context.Context, string, string) (ImplResponse, error)
 	MsproxyMsGraphPathGet(context.Context, string, string) (ImplResponse, error)
+	MsproxyMsGraphPathPost(context.Context, string, string) (ImplResponse, error)
+	MsproxyMsGraphPathPut(context.Context, string, string) (ImplResponse, error)
 }
 
 // VersionApiServicer defines the api actions for the VersionApi service
