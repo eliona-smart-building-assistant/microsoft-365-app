@@ -376,7 +376,7 @@ func (g *GraphHelper) GetEquipment(config apiserver.Configuration) ([]Equipment,
 		r, err := g.userClient.Users().ByUserId(name).MailboxSettings().Get(context.Background(), nil)
 		if err != nil {
 			printOdataError(err)
-			log.Error("microsoft-365", "querying users API: %v", err)
+			log.Error("microsoft-365", "querying users API for user %s: %v", name, err)
 			return true
 		}
 		purpose := r.GetUserPurpose()

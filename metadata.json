@@ -1,6 +1,6 @@
 {
   "name": "microsoft-365",
-  "elionaMinVersion": "9.2.0",
+  "elionaMinVersion": "v10.1.0",
   "displayName": {
     "en": "Microsoft 365",
     "de": "Microsoft 365"
