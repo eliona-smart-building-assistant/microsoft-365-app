@@ -222,6 +222,10 @@ paths:
       responses:
         "200":
           description: Successfully got
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProxyResponse"
     post:
       tags:
         - Proxy
@@ -244,6 +248,10 @@ paths:
       responses:
         "200":
           description: Successfully posted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProxyResponse"
     put:
       tags:
         - Proxy
@@ -266,6 +274,10 @@ paths:
       responses:
         "200":
           description: Successfully put
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProxyResponse"
     delete:
       tags:
         - Proxy
@@ -288,6 +300,10 @@ paths:
       responses:
         "200":
           description: Successfully deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProxyResponse"
 
 components:
   parameters:
@@ -391,3 +407,17 @@ components:
         regex:
           type: string
           example: "^Microsoft 365.*$"
+
+    ProxyResponse:
+      type: array
+      items:
+        type: object
+        properties:
+          config_id:
+            type: integer
+          username:
+            type: string
+          code:
+            type: integer
+          body:
+            type: object
