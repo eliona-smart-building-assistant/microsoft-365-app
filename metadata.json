@@ -9,9 +9,7 @@
     "en": "The Microsoft 365 App allows access to Microsoft 365 API.",
     "de": "Die Microsoft 365 App ermöglicht den Zugriff auf die Microsoft 365 API."
   },
-  "dashboardTemplateNames": [
-    "Microsoft 365"
-  ],
+  "dashboardTemplateNames": [],
   "apiUrl": "v1",
   "apiSpecificationPath": "/version/openapi.json",
   "documentationUrl": "https://doc.eliona.io/collection/eliona-apps/apps/microsoft-365",
