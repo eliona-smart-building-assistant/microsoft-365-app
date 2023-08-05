@@ -19,6 +19,16 @@
 				"de": "Im Zeitplan",
 				"en": "On Schedule"
 			}
+		},
+		{
+			"enable": true,
+			"name": "is_occupied",
+			"subtype": "input",
+			"type": "device-info",
+			"translation": {
+				"de": "Besetzt",
+				"en": "Occupied"
+			}
 		}
 	],
 	"custom": true,

@@ -212,6 +212,8 @@ type Room struct {
 	AudioDeviceName        *string         `eliona:"audio_device_name,filterable" subtype:"info"`
 	VideoDeviceName        *string         `eliona:"video_device_name,filterable" subtype:"info"`
 	OnSchedule             *string         `eliona:"on_schedule" subtype:"input"`
+	// To be able to use this information in Eliona Rule engine, we need to use numbers.
+	IsOccupied *int8 `eliona:"is_occupied" subtype:"input"`
 }
 
 func (room Room) AssetType() string {
@@ -241,6 +243,11 @@ func (r *Room) getEmailAddress() *string {
 
 func (r *Room) setOnSchedule(s *string) {
 	r.OnSchedule = s
+	occ := int8(0)
+	if s != nil {
+		occ = 1
+	}
+	r.IsOccupied = &occ
 }
 
 func apiFilterToCommonFilter(input [][]apiserver.FilterRule) [][]common.FilterRule {
@@ -312,6 +319,8 @@ type Equipment struct {
 	EmailAddress *string `eliona:"email_address,filterable" subtype:"info"`
 	DisplayName  *string `eliona:"display_name,filterable" subtype:"info"`
 	OnSchedule   *string `eliona:"on_schedule" subtype:"input"`
+	// To be able to use this information in Eliona Rule engine, we need to use numbers.
+	IsOccupied *int8 `eliona:"is_occupied" subtype:"input"`
 }
 
 func (equipment Equipment) AssetType() string {
@@ -341,6 +350,11 @@ func (e *Equipment) getEmailAddress() *string {
 
 func (e *Equipment) setOnSchedule(s *string) {
 	e.OnSchedule = s
+	occ := int8(0)
+	if s != nil {
+		occ = 1
+	}
+	e.IsOccupied = &occ
 }
 
 func (g *GraphHelper) GetEquipment(config apiserver.Configuration) ([]Equipment, error) {
