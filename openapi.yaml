@@ -20,8 +20,8 @@ info:
   title: Microsoft 365 App
   description: API to access and configure the Microsoft 365 App
 externalDocs:
-  description: Microsoft 365 App repository
-  url: https://github.com/eliona-smart-building-assistant/microsoft-365-app
+  description: Microsoft 365 App documentation
+  url: https://doc.eliona.io/collection/eliona-apps/apps/microsoft-365
 servers:
   - url: http://microsoft-365/v1
 
