@@ -65,13 +65,13 @@ func (c *ConfigurationApiController) Routes() Routes {
 		{
 			"GetConfigurations",
 			strings.ToUpper("Get"),
-			"/v1/configurations",
+			"/v1/configs",
 			c.GetConfigurations,
 		},
 		{
 			"PostConfiguration",
 			strings.ToUpper("Post"),
-			"/v1/configurations",
+			"/v1/configs",
 			c.PostConfiguration,
 		},
 		{

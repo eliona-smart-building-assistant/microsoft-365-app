@@ -47,7 +47,7 @@ tags:
       url: https://github.com/eliona-smart-building-assistant/microsoft-365-app
 
 paths:
-  /configurations:
+  /configs:
     get:
       tags:
         - Configuration
@@ -89,7 +89,16 @@ paths:
       summary: Get configuration
       description: Gets information about the configuration with the given id
       parameters:
-        - $ref: "#/components/parameters/config-id"
+        - name: config-id
+          in: path
+          description: The id of the config
+          example: 4711
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 4711
+
       operationId: getConfigurationById
       responses:
         "200":
@@ -106,7 +115,15 @@ paths:
       summary: Updates a configuration
       description: Updates a configuration
       parameters:
-        - $ref: "#/components/parameters/config-id"
+        - name: config-id
+          in: path
+          description: The id of the config
+          example: 4711
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 4711
       operationId: putConfigurationById
       requestBody:
         content:
@@ -126,7 +143,15 @@ paths:
       summary: Deletes a configuration
       description: Removes information about the configuration with the given id
       parameters:
-        - $ref: "#/components/parameters/config-id"
+        - name: config-id
+          in: path
+          description: The id of the config
+          example: 4711
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 4711
       operationId: deleteConfigurationById
       responses:
         "204":
@@ -306,18 +331,6 @@ paths:
                 $ref: "#/components/schemas/ProxyResponse"
 
 components:
-  parameters:
-    config-id:
-      name: config-id
-      in: path
-      description: The id of the config
-      example: 4711
-      required: true
-      schema:
-        type: integer
-        format: int64
-        example: 4711
-
   schemas:
     Configuration:
       type: object
