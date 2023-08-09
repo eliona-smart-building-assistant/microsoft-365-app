@@ -60,6 +60,11 @@ func GetConfig(ctx context.Context, configID int64) (*apiserver.Configuration, e
 }
 
 func DeleteConfig(ctx context.Context, configID int64) error {
+	if _, err := appdb.Assets(
+		appdb.AssetWhere.ConfigurationID.EQ(configID),
+	).DeleteAllG(ctx); err != nil {
+		return fmt.Errorf("deleting assets from database: %v", err)
+	}
 	count, err := appdb.Configurations(
 		appdb.ConfigurationWhere.ID.EQ(configID),
 	).DeleteAllG(ctx)
