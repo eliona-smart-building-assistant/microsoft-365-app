@@ -41,6 +41,11 @@ tags:
     externalDocs:
       url: https://github.com/eliona-smart-building-assistant/microsoft-365-app
 
+  - name: Booking
+    description: Booking Microsoft 365 resources
+    externalDocs:
+      url: https://github.com/eliona-smart-building-assistant/microsoft-365-app
+
   - name: Proxy
     description: Microsoft 365 proxy - implemented standalone
     externalDocs:
@@ -198,6 +203,81 @@ paths:
                 $ref: "https://raw.githubusercontent.com/eliona-smart-building-assistant/eliona-api/main/openapi.yaml#/components/schemas/Dashboard"
         "404":
           description: Template name not found
+
+  /bookings:
+    get:
+      tags:
+        - Booking
+      summary: List bookings
+      parameters:
+        - name: start
+          in: query
+          description: The start datetime for querying bookings in ISO 8601 format.
+          required: true
+          schema:
+            type: string
+            format: date-time
+            example: "2023-01-01T09:00:00Z"
+        - name: end
+          in: query
+          description: The end datetime for querying bookings in ISO 8601 format.
+          required: true
+          schema:
+            type: string
+            format: date-time
+            example: "2023-01-01T18:00:00Z"
+        - name: assetId
+          in: query
+          description: The ID of the asset for which bookings are being queried.
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A list of bookings.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Booking"
+    post:
+      tags:
+        - Booking
+      summary: Create a booking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBookingRequest"
+      responses:
+        "201":
+          description: Booking created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Booking"
+        "400":
+          description: Bad request (e.g., validation errors).
+
+  /bookings/{bookingId}:
+    delete:
+      tags:
+        - Booking
+      summary: Cancel a booking
+      parameters:
+        - name: bookingId
+          in: path
+          description: The ID of the booking to be cancelled.
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Booking cancelled successfully.
+        "404":
+          description: Booking not found.
 
   /msproxy/{ms-graph-path}:
     get:
@@ -406,6 +486,69 @@ components:
         regex:
           type: string
           example: "^Microsoft 365.*$"
+
+    Booking:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The booking ID.
+        start:
+          type: string
+          format: date-time
+          description: The start datetime of the booking in ISO 8601 format.
+          example: "2023-01-01T09:00:00Z"
+        end:
+          type: string
+          format: date-time
+          description: The end datetime of the booking in ISO 8601 format.
+          example: "2023-01-01T18:00:00Z"
+        organizerID:
+          type: string
+          description: The ID (email) of the organizer.
+        organizerName:
+          type: string
+          description: The name of the organizer.
+        eventName:
+          type: string
+          description: The name of the event.
+        description:
+          type: string
+          description: A description of the event or booking.
+    CreateBookingRequest:
+      type: object
+      properties:
+        assetId:
+          type: string
+          description: The ID of the asset which is being booked.
+        start:
+          type: string
+          format: date-time
+          description: The start datetime of the booking in ISO 8601 format.
+          example: "2023-01-01T09:00:00Z"
+        end:
+          type: string
+          format: date-time
+          description: The end datetime of the booking in ISO 8601 format.
+          example: "2023-01-01T18:00:00Z"
+        email:
+          type: string
+          description: Email address of the organizer or attendee.
+          format: email
+        password:
+          type: string
+          description: Password for authentication or verification.
+        eventName:
+          type: string
+          description: The name of the event. (Optional)
+        description:
+          type: string
+          description: A description of the event or booking. (Optional)
+      required:
+        - start
+        - end
+        - email
+        - password
 
     ProxyResponse:
       type: array
