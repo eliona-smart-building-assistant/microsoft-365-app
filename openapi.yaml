@@ -20,8 +20,8 @@ info:
   title: Microsoft 365 App
   description: API to access and configure the Microsoft 365 App
 externalDocs:
-  description: Microsoft 365 App repository
-  url: https://github.com/eliona-smart-building-assistant/microsoft-365-app
+  description: Microsoft 365 App documentation
+  url: https://doc.eliona.io/collection/eliona-apps/apps/microsoft-365
 servers:
   - url: http://microsoft-365/v1
 
@@ -47,7 +47,7 @@ tags:
       url: https://github.com/eliona-smart-building-assistant/microsoft-365-app
 
 paths:
-  /configurations:
+  /configs:
     get:
       tags:
         - Configuration
@@ -89,7 +89,16 @@ paths:
       summary: Get configuration
       description: Gets information about the configuration with the given id
       parameters:
-        - $ref: "#/components/parameters/config-id"
+        - name: config-id
+          in: path
+          description: The id of the config
+          example: 4711
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 4711
+
       operationId: getConfigurationById
       responses:
         "200":
@@ -106,7 +115,15 @@ paths:
       summary: Updates a configuration
       description: Updates a configuration
       parameters:
-        - $ref: "#/components/parameters/config-id"
+        - name: config-id
+          in: path
+          description: The id of the config
+          example: 4711
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 4711
       operationId: putConfigurationById
       requestBody:
         content:
@@ -126,7 +143,15 @@ paths:
       summary: Deletes a configuration
       description: Removes information about the configuration with the given id
       parameters:
-        - $ref: "#/components/parameters/config-id"
+        - name: config-id
+          in: path
+          description: The id of the config
+          example: 4711
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 4711
       operationId: deleteConfigurationById
       responses:
         "204":
@@ -222,6 +247,10 @@ paths:
       responses:
         "200":
           description: Successfully got
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProxyResponse"
     post:
       tags:
         - Proxy
@@ -244,6 +273,10 @@ paths:
       responses:
         "200":
           description: Successfully posted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProxyResponse"
     put:
       tags:
         - Proxy
@@ -266,6 +299,10 @@ paths:
       responses:
         "200":
           description: Successfully put
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProxyResponse"
     delete:
       tags:
         - Proxy
@@ -288,20 +325,12 @@ paths:
       responses:
         "200":
           description: Successfully deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProxyResponse"
 
 components:
-  parameters:
-    config-id:
-      name: config-id
-      in: path
-      description: The id of the config
-      example: 4711
-      required: true
-      schema:
-        type: integer
-        format: int64
-        example: 4711
-
   schemas:
     Configuration:
       type: object
@@ -391,3 +420,17 @@ components:
         regex:
           type: string
           example: "^Microsoft 365.*$"
+
+    ProxyResponse:
+      type: array
+      items:
+        type: object
+        properties:
+          config_id:
+            type: integer
+          username:
+            type: string
+          code:
+            type: integer
+          body:
+            type: object

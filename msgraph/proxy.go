@@ -1,6 +1,7 @@
 package msgraph
 
 import (
+	"compress/gzip"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -88,8 +89,23 @@ func (proxy *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		defer graphRes.Body.Close()
+		bodyReader := io.Reader(graphRes.Body)
 
-		body, err := io.ReadAll(graphRes.Body)
+		// The http client automatically decompresses gzip encoding, unless the encoding is
+		// explicitly requested in the request headers. This is our case, when we try to access the
+		// proxy from the browser. The browser requests gzip, the header is copied and therefore
+		// considered by the client as explicitly requested. Therefore we must explicitly decode it.
+		if graphRes.Header.Get("Content-Encoding") == "gzip" {
+			gzipReader, err := gzip.NewReader(graphRes.Body)
+			if err != nil {
+				http.Error(w, "Error creating gzip reader: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
+			defer gzipReader.Close()
+			bodyReader = gzipReader
+		}
+
+		body, err := io.ReadAll(bodyReader)
 		if err != nil {
 			http.Error(w, "Error reading body: "+err.Error(), http.StatusInternalServerError)
 			return
