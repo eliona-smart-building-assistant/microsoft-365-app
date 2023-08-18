@@ -89,16 +89,7 @@ paths:
       summary: Get configuration
       description: Gets information about the configuration with the given id
       parameters:
-        - name: config-id
-          in: path
-          description: The id of the config
-          example: 4711
-          required: true
-          schema:
-            type: integer
-            format: int64
-            example: 4711
-
+        - $ref: "#/components/parameters/config-id"
       operationId: getConfigurationById
       responses:
         "200":
@@ -115,15 +106,7 @@ paths:
       summary: Updates a configuration
       description: Updates a configuration
       parameters:
-        - name: config-id
-          in: path
-          description: The id of the config
-          example: 4711
-          required: true
-          schema:
-            type: integer
-            format: int64
-            example: 4711
+        - $ref: "#/components/parameters/config-id"
       operationId: putConfigurationById
       requestBody:
         content:
@@ -143,15 +126,7 @@ paths:
       summary: Deletes a configuration
       description: Removes information about the configuration with the given id
       parameters:
-        - name: config-id
-          in: path
-          description: The id of the config
-          example: 4711
-          required: true
-          schema:
-            type: integer
-            format: int64
-            example: 4711
+        - $ref: "#/components/parameters/config-id"
       operationId: deleteConfigurationById
       responses:
         "204":
@@ -331,6 +306,17 @@ paths:
                 $ref: "#/components/schemas/ProxyResponse"
 
 components:
+  parameters:
+    config-id:
+      name: config-id
+      in: path
+      description: The id of the config
+      example: 4711
+      required: true
+      schema:
+        type: integer
+        format: int64
+        example: 4711
   schemas:
     Configuration:
       type: object
