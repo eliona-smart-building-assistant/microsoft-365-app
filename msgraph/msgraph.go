@@ -14,7 +14,6 @@ import (
 	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
-	"github.com/microsoftgraph/msgraph-sdk-go/models/odataerrors"
 	"github.com/microsoftgraph/msgraph-sdk-go/users"
 
 	"github.com/eliona-smart-building-assistant/go-eliona/utils"
@@ -267,7 +266,6 @@ func apiFilterToCommonFilter(input [][]apiserver.FilterRule) [][]common.FilterRu
 func (g *GraphHelper) GetRooms(config apiserver.Configuration) ([]Room, error) {
 	r, err := g.userClient.Places().GraphRoom().Get(context.Background(), nil)
 	if err != nil {
-		printOdataError(err)
 		return nil, fmt.Errorf("querying rooms API: %+v", err)
 	}
 
@@ -370,7 +368,6 @@ func (g *GraphHelper) GetEquipment(config apiserver.Configuration) ([]Equipment,
 	// }
 	r, err := g.userClient.Users().Get(context.Background(), nil)
 	if err != nil {
-		printOdataError(err)
 		return nil, fmt.Errorf("querying users list API: %+v", err)
 	}
 
@@ -389,7 +386,6 @@ func (g *GraphHelper) GetEquipment(config apiserver.Configuration) ([]Equipment,
 		name := *msuser.GetUserPrincipalName()
 		r, err := g.userClient.Users().ByUserId(name).MailboxSettings().Get(context.Background(), nil)
 		if err != nil {
-			printOdataError(err)
 			log.Error("microsoft-365", "querying users API for user %s: %v", name, err)
 			return true
 		}
@@ -501,7 +497,6 @@ func fetchSchedules[T GraphAsset](g *GraphHelper, rooms map[string]T) (map[strin
 		var err error
 		r, err = g.userClient.Me().Calendar().GetSchedule().Post(context.Background(), requestBody, configuration)
 		if err != nil {
-			printOdataError(err)
 			return nil, fmt.Errorf("querying calendar API via delegated permission: %+v", err)
 		}
 	} else {
@@ -509,7 +504,6 @@ func fetchSchedules[T GraphAsset](g *GraphHelper, rooms map[string]T) (map[strin
 		var err error
 		r, err = g.userClient.Users().ByUserId(randomAddress).Calendar().GetSchedule().Post(context.Background(), requestBody, configuration)
 		if err != nil {
-			printOdataError(err)
 			return nil, fmt.Errorf("querying calendar API via app permission: %+v", err)
 		}
 	}
@@ -610,19 +604,5 @@ func convertToEquipment(u models.User) Equipment {
 	return Equipment{
 		DisplayName:  u.GetDisplayName(),
 		EmailAddress: u.GetUserPrincipalName(),
-	}
-}
-
-func printOdataError(err error) {
-	switch err.(type) {
-	case *odataerrors.ODataError:
-		typed := err.(*odataerrors.ODataError)
-		fmt.Printf("error: %v\n", typed.Error())
-		if terr := typed.GetError(); terr != nil {
-			fmt.Printf("code: %s\n", *terr.GetCode())
-			fmt.Printf("msg: %s\n", *terr.GetMessage())
-		}
-	default:
-		fmt.Printf("%T > error: %#v\n", err, err)
 	}
 }
