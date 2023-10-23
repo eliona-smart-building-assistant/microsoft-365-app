@@ -6,11 +6,11 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.8.0
 	github.com/eliona-smart-building-assistant/app-integration-tests v0.0.5
 	github.com/eliona-smart-building-assistant/go-eliona v1.9.18
-	github.com/eliona-smart-building-assistant/go-utils v1.0.41
+	github.com/eliona-smart-building-assistant/go-utils v1.0.42
 	github.com/gorilla/mux v1.8.0
 	github.com/microsoft/kiota-abstractions-go v1.3.0
 	github.com/microsoft/kiota-authentication-azure-go v1.0.1
-	github.com/microsoftgraph/msgraph-sdk-go v1.21.0
+	github.com/microsoftgraph/msgraph-sdk-go v1.22.0
 	github.com/microsoftgraph/msgraph-sdk-go-core v1.0.0
 	github.com/volatiletech/null/v8 v8.1.2
 	github.com/volatiletech/sqlboiler/v4 v4.15.0
@@ -37,7 +37,7 @@ require (
 	github.com/microsoft/kiota-serialization-text-go v1.0.0 // indirect
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/std-uritemplate/std-uritemplate/go v0.0.44 // indirect
+	github.com/std-uritemplate/std-uritemplate/go v0.0.46 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/volatiletech/randomize v0.0.1 // indirect
 	go.opentelemetry.io/otel v1.19.0 // indirect

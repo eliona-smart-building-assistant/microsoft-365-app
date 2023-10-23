@@ -133,8 +133,8 @@ github.com/eliona-smart-building-assistant/go-eliona v1.9.18 h1:ScQX7qzzMxFQ/BIY
 github.com/eliona-smart-building-assistant/go-eliona v1.9.18/go.mod h1:ehuVQA1bNiSaCQV08QEwpoX7/F3rlGUTQzek/YPthFQ=
 github.com/eliona-smart-building-assistant/go-eliona-api-client/v2 v2.5.4 h1:IUH1kIKDSGXFomkLegLyF9cN2Swq0tWwlgPZgCxNOBk=
 github.com/eliona-smart-building-assistant/go-eliona-api-client/v2 v2.5.4/go.mod h1:cyKWAhCHbCrKrpbX8BJjWrxQ9mWgk3HpjkU68wp2pao=
-github.com/eliona-smart-building-assistant/go-utils v1.0.41 h1:VsEDZSPWOG742NX9UfIAEH61rErpTetkJB+CzukCOdw=
-github.com/eliona-smart-building-assistant/go-utils v1.0.41/go.mod h1:/QShdw3UfRQTT7oIxIFw3nkxVcPFyI1ypdqLh35r/bQ=
+github.com/eliona-smart-building-assistant/go-utils v1.0.42 h1:vexf+4UgEtN2Q9wC27DExXhqDXseoADavvVGCze39/I=
+github.com/eliona-smart-building-assistant/go-utils v1.0.42/go.mod h1:/QShdw3UfRQTT7oIxIFw3nkxVcPFyI1ypdqLh35r/bQ=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.1-0.20191026205805-5f8ba28d4473/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.4/go.mod h1:6rpuAdCZL397s3pYoYcLgu1mIlRU8Am5FuJP05cCM98=
@@ -432,8 +432,8 @@ github.com/microsoft/kiota-serialization-multipart-go v1.0.0 h1:3O5sb5Zj+moLBiJy
 github.com/microsoft/kiota-serialization-multipart-go v1.0.0/go.mod h1:yauLeBTpANk4L03XD985akNysG24SnRJGaveZf+p4so=
 github.com/microsoft/kiota-serialization-text-go v1.0.0 h1:XOaRhAXy+g8ZVpcq7x7a0jlETWnWrEum0RhmbYrTFnA=
 github.com/microsoft/kiota-serialization-text-go v1.0.0/go.mod h1:sM1/C6ecnQ7IquQOGUrUldaO5wj+9+v7G2W3sQ3fy6M=
-github.com/microsoftgraph/msgraph-sdk-go v1.21.0 h1:uGoZ9Cg8QMU1gGukfmxCNlMKJSVRtLSTBTmKc7rpBig=
-github.com/microsoftgraph/msgraph-sdk-go v1.21.0/go.mod h1:wbFuQwwQw1pn/fV22mX51oclIEZ3zhZe7bBpWAdKgbM=
+github.com/microsoftgraph/msgraph-sdk-go v1.22.0 h1:CuoJU7/0UEZvO8wIeypRz2BUXe2cs/o/DqfpGlBvqH4=
+github.com/microsoftgraph/msgraph-sdk-go v1.22.0/go.mod h1:wNm5PDM3ShAnvkhDBptRR4K9e/Rd6LBG1QbOHQAYscM=
 github.com/microsoftgraph/msgraph-sdk-go-core v1.0.0 h1:7NWTfyXvOjoizW7PmxNp3+8wCKPgpODs/D1cUZ3fkAY=
 github.com/microsoftgraph/msgraph-sdk-go-core v1.0.0/go.mod h1:tQb4q3YMIj2dWhhXhQSJ4ELpol931ANKzHSYK5kX1qE=
 github.com/miekg/dns v1.1.26/go.mod h1:bPDLeHnStXmXAq1m/Ch/hvfNHr14JKNPMBo3VZKjuso=
@@ -526,8 +526,8 @@ github.com/spf13/cobra v1.5.0/go.mod h1:dWXEIy2H428czQCjInthrTRUg7yKbok+2Qi/yBIJ
 github.com/spf13/jwalterweatherman v1.1.0/go.mod h1:aNWZUN0dPAAO/Ljvb5BEdw96iTZ0EXowPYD95IqWIGo=
 github.com/spf13/pflag v1.0.5/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An2Bg=
 github.com/spf13/viper v1.12.0/go.mod h1:b6COn30jlNxbm/V2IqWiNWkJ+vZNiMNksliPCiuKtSI=
-github.com/std-uritemplate/std-uritemplate/go v0.0.44 h1:muH3f/+0UsUGHLYno3HsGrUehIykjpgWkSfkuHPUWKg=
-github.com/std-uritemplate/std-uritemplate/go v0.0.44/go.mod h1:Qov4Ay4U83j37XjgxMYevGJFLbnZ2o9cEOhGufBKgKY=
+github.com/std-uritemplate/std-uritemplate/go v0.0.46 h1:rWcEym/hz9YhPTXJELTXfrq48lTx69jNVhv+dOMmyZY=
+github.com/std-uritemplate/std-uritemplate/go v0.0.46/go.mod h1:Qov4Ay4U83j37XjgxMYevGJFLbnZ2o9cEOhGufBKgKY=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/objx v0.2.0/go.mod h1:qt09Ya8vawLte6SNmTgCsAVtYtaKzEcn8ATUoHMkEqE=
