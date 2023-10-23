@@ -141,9 +141,9 @@ func listenApi() {
 	r.PathPrefix(msproxyUrl).Handler(http.StripPrefix(msproxyUrl, &msgraph.Proxy{}))
 
 	r.PathPrefix("/").Handler(utilshttp.NewCORSEnabledHandler(apiserver.NewRouter(
-		apiserver.NewConfigurationApiController(apiservices.NewConfigurationApiService()),
-		apiserver.NewVersionApiController(apiservices.NewVersionApiService()),
-		apiserver.NewCustomizationApiController(apiservices.NewCustomizationApiService()),
+		apiserver.NewConfigurationAPIController(apiservices.NewConfigurationApiService()),
+		apiserver.NewVersionAPIController(apiservices.NewVersionApiService()),
+		apiserver.NewCustomizationAPIController(apiservices.NewCustomizationApiService()),
 	)))
 
 	err := http.ListenAndServe(":"+common.Getenv("API_SERVER_PORT", "3000"), r)
