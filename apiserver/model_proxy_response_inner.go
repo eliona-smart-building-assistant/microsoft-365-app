@@ -24,14 +24,7 @@ func AssertProxyResponseInnerRequired(obj ProxyResponseInner) error {
 	return nil
 }
 
-// AssertRecurseProxyResponseInnerRequired recursively checks if required fields are not zero-ed in a nested slice.
-// Accepts only nested slice of ProxyResponseInner (e.g. [][]ProxyResponseInner), otherwise ErrTypeAssertionError is thrown.
-func AssertRecurseProxyResponseInnerRequired(objSlice interface{}) error {
-	return AssertRecurseInterfaceRequired(objSlice, func(obj interface{}) error {
-		aProxyResponseInner, ok := obj.(ProxyResponseInner)
-		if !ok {
-			return ErrTypeAssertionError
-		}
-		return AssertProxyResponseInnerRequired(aProxyResponseInner)
-	})
+// AssertProxyResponseInnerConstraints checks if the values respects the defined constraints
+func AssertProxyResponseInnerConstraints(obj ProxyResponseInner) error {
+	return nil
 }
