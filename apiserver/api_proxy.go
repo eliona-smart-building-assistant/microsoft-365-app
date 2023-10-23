@@ -16,25 +16,25 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// ProxyApiController binds http requests to an api service and writes the service results to the http response
-type ProxyApiController struct {
-	service      ProxyApiServicer
+// ProxyAPIController binds http requests to an api service and writes the service results to the http response
+type ProxyAPIController struct {
+	service      ProxyAPIServicer
 	errorHandler ErrorHandler
 }
 
-// ProxyApiOption for how the controller is set up.
-type ProxyApiOption func(*ProxyApiController)
+// ProxyAPIOption for how the controller is set up.
+type ProxyAPIOption func(*ProxyAPIController)
 
-// WithProxyApiErrorHandler inject ErrorHandler into controller
-func WithProxyApiErrorHandler(h ErrorHandler) ProxyApiOption {
-	return func(c *ProxyApiController) {
+// WithProxyAPIErrorHandler inject ErrorHandler into controller
+func WithProxyAPIErrorHandler(h ErrorHandler) ProxyAPIOption {
+	return func(c *ProxyAPIController) {
 		c.errorHandler = h
 	}
 }
 
-// NewProxyApiController creates a default api controller
-func NewProxyApiController(s ProxyApiServicer, opts ...ProxyApiOption) Router {
-	controller := &ProxyApiController{
+// NewProxyAPIController creates a default api controller
+func NewProxyAPIController(s ProxyAPIServicer, opts ...ProxyAPIOption) Router {
+	controller := &ProxyAPIController{
 		service:      s,
 		errorHandler: DefaultErrorHandler,
 	}
@@ -46,29 +46,25 @@ func NewProxyApiController(s ProxyApiServicer, opts ...ProxyApiOption) Router {
 	return controller
 }
 
-// Routes returns all the api routes for the ProxyApiController
-func (c *ProxyApiController) Routes() Routes {
+// Routes returns all the api routes for the ProxyAPIController
+func (c *ProxyAPIController) Routes() Routes {
 	return Routes{
-		{
-			"MsproxyMsGraphPathDelete",
+		"MsproxyMsGraphPathDelete": Route{
 			strings.ToUpper("Delete"),
 			"/v1/msproxy/{ms-graph-path}",
 			c.MsproxyMsGraphPathDelete,
 		},
-		{
-			"MsproxyMsGraphPathGet",
+		"MsproxyMsGraphPathGet": Route{
 			strings.ToUpper("Get"),
 			"/v1/msproxy/{ms-graph-path}",
 			c.MsproxyMsGraphPathGet,
 		},
-		{
-			"MsproxyMsGraphPathPost",
+		"MsproxyMsGraphPathPost": Route{
 			strings.ToUpper("Post"),
 			"/v1/msproxy/{ms-graph-path}",
 			c.MsproxyMsGraphPathPost,
 		},
-		{
-			"MsproxyMsGraphPathPut",
+		"MsproxyMsGraphPathPut": Route{
 			strings.ToUpper("Put"),
 			"/v1/msproxy/{ms-graph-path}",
 			c.MsproxyMsGraphPathPut,
@@ -77,10 +73,9 @@ func (c *ProxyApiController) Routes() Routes {
 }
 
 // MsproxyMsGraphPathDelete - A proxy server that passes requests to the Microsoft Graph API
-func (c *ProxyApiController) MsproxyMsGraphPathDelete(w http.ResponseWriter, r *http.Request) {
+func (c *ProxyAPIController) MsproxyMsGraphPathDelete(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	msGraphPathParam := params["ms-graph-path"]
-
 	elionaProjectIdParam := r.Header.Get("eliona-project-id")
 	result, err := c.service.MsproxyMsGraphPathDelete(r.Context(), msGraphPathParam, elionaProjectIdParam)
 	// If an error occurred, encode the error with the status code
@@ -90,14 +85,12 @@ func (c *ProxyApiController) MsproxyMsGraphPathDelete(w http.ResponseWriter, r *
 	}
 	// If no error, encode the body and the result code
 	EncodeJSONResponse(result.Body, &result.Code, w)
-
 }
 
 // MsproxyMsGraphPathGet - A proxy server that passes requests to the Microsoft Graph API
-func (c *ProxyApiController) MsproxyMsGraphPathGet(w http.ResponseWriter, r *http.Request) {
+func (c *ProxyAPIController) MsproxyMsGraphPathGet(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	msGraphPathParam := params["ms-graph-path"]
-
 	elionaProjectIdParam := r.Header.Get("eliona-project-id")
 	result, err := c.service.MsproxyMsGraphPathGet(r.Context(), msGraphPathParam, elionaProjectIdParam)
 	// If an error occurred, encode the error with the status code
@@ -107,14 +100,12 @@ func (c *ProxyApiController) MsproxyMsGraphPathGet(w http.ResponseWriter, r *htt
 	}
 	// If no error, encode the body and the result code
 	EncodeJSONResponse(result.Body, &result.Code, w)
-
 }
 
 // MsproxyMsGraphPathPost - A proxy server that passes requests to the Microsoft Graph API
-func (c *ProxyApiController) MsproxyMsGraphPathPost(w http.ResponseWriter, r *http.Request) {
+func (c *ProxyAPIController) MsproxyMsGraphPathPost(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	msGraphPathParam := params["ms-graph-path"]
-
 	elionaProjectIdParam := r.Header.Get("eliona-project-id")
 	result, err := c.service.MsproxyMsGraphPathPost(r.Context(), msGraphPathParam, elionaProjectIdParam)
 	// If an error occurred, encode the error with the status code
@@ -124,14 +115,12 @@ func (c *ProxyApiController) MsproxyMsGraphPathPost(w http.ResponseWriter, r *ht
 	}
 	// If no error, encode the body and the result code
 	EncodeJSONResponse(result.Body, &result.Code, w)
-
 }
 
 // MsproxyMsGraphPathPut - A proxy server that passes requests to the Microsoft Graph API
-func (c *ProxyApiController) MsproxyMsGraphPathPut(w http.ResponseWriter, r *http.Request) {
+func (c *ProxyAPIController) MsproxyMsGraphPathPut(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	msGraphPathParam := params["ms-graph-path"]
-
 	elionaProjectIdParam := r.Header.Get("eliona-project-id")
 	result, err := c.service.MsproxyMsGraphPathPut(r.Context(), msGraphPathParam, elionaProjectIdParam)
 	// If an error occurred, encode the error with the status code
@@ -141,5 +130,4 @@ func (c *ProxyApiController) MsproxyMsGraphPathPut(w http.ResponseWriter, r *htt
 	}
 	// If no error, encode the body and the result code
 	EncodeJSONResponse(result.Body, &result.Code, w)
-
 }
