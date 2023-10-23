@@ -37,7 +37,7 @@ create table if not exists microsoft_365.configuration
 create table if not exists microsoft_365.asset
 (
 	id               bigserial primary key,
-	configuration_id bigserial not null references microsoft_365.configuration(id),
+	configuration_id bigserial not null references microsoft_365.configuration(id) ON DELETE CASCADE,
 	project_id       text      not null,
 	global_asset_id  text      not null,
 	asset_id         integer
