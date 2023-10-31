@@ -5,12 +5,12 @@ go 1.20
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.8.0
 	github.com/eliona-smart-building-assistant/app-integration-tests v0.0.5
-	github.com/eliona-smart-building-assistant/go-eliona v1.9.18
-	github.com/eliona-smart-building-assistant/go-utils v1.0.42
+	github.com/eliona-smart-building-assistant/go-eliona v1.9.19
+	github.com/eliona-smart-building-assistant/go-utils v1.0.44
 	github.com/gorilla/mux v1.8.0
 	github.com/microsoft/kiota-abstractions-go v1.3.0
 	github.com/microsoft/kiota-authentication-azure-go v1.0.1
-	github.com/microsoftgraph/msgraph-sdk-go v1.22.0
+	github.com/microsoftgraph/msgraph-sdk-go v1.23.0
 	github.com/microsoftgraph/msgraph-sdk-go-core v1.0.0
 	github.com/volatiletech/null/v8 v8.1.2
 	github.com/volatiletech/sqlboiler/v4 v4.15.0
