@@ -46,6 +46,7 @@ func CreateRoomsAssetsIfNecessary(config apiserver.Configuration, rooms []msgrap
 				assetType:               assetType,
 				name:                    *name,
 				description:             fmt.Sprintf("%s (%v)", *name, *id),
+				email:                   *room.EmailAddress,
 			})
 			if err != nil {
 				return fmt.Errorf("upserting room %s: %v", *id, err)
@@ -73,6 +74,7 @@ func CreateEquipmentAssetsIfNecessary(config apiserver.Configuration, equipmentL
 				assetType:               assetType,
 				name:                    *name,
 				description:             fmt.Sprintf("%s (%v)", *name, *id),
+				email:                   *equipment.EmailAddress,
 			})
 			if err != nil {
 				return fmt.Errorf("upserting equipment %s: %v", *id, err)
@@ -104,6 +106,7 @@ type assetData struct {
 	assetType               string
 	name                    string
 	description             string
+	email                   string
 }
 
 func upsertAsset(d assetData) (created bool, assetID int32, err error) {
@@ -135,7 +138,7 @@ func upsertAsset(d assetData) (created bool, assetID int32, err error) {
 	}
 
 	// Remember the asset id for further usage
-	if err := conf.InsertAsset(context.Background(), d.config, d.projectId, d.identifier, *newID); err != nil {
+	if err := conf.InsertAsset(context.Background(), d.config, d.projectId, d.identifier, *newID, d.email); err != nil {
 		return false, 0, fmt.Errorf("inserting asset to config db: %v", err)
 	}
 

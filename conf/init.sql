@@ -40,7 +40,8 @@ create table if not exists microsoft_365.asset
 	configuration_id bigserial not null references microsoft_365.configuration(id) ON DELETE CASCADE,
 	project_id       text      not null,
 	global_asset_id  text      not null,
-	asset_id         integer
+	asset_id         integer,
+	email            text      not null
 );
 
 -- Makes the new objects available for all other init steps
