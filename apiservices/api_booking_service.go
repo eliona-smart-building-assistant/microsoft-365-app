@@ -181,17 +181,18 @@ func (s *BookingAPIService) BookingsPost(ctx context.Context, createBookingReque
 }
 
 // BookingsBookingIdDelete - Cancel a booking
-func (s *BookingAPIService) BookingsBookingIdDelete(ctx context.Context, bookingId string) (apiserver.ImplResponse, error) {
-	// TODO - update BookingsBookingIdDelete with the required logic for this service method.
-	// Add api_booking_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+func (s *BookingAPIService) BookingsDeletePost(ctx context.Context, deleteBookingRequest apiserver.DeleteBookingRequest) (apiserver.ImplResponse, error) {
+	session, ok := s.sessions[deleteBookingRequest.DeviceCode]
+	if !ok {
+		return apiserver.Response(http.StatusBadRequest, nil), errors.New("invalid device code")
+	}
 
-	// TODO: Uncomment the next line to return response Response(204, {}) or use other options such as http.Ok ...
-	// return Response(204, nil),nil
+	if err := session.graph.DeleteBooking(ctx, deleteBookingRequest.BookingId); err != nil {
+		log.Error("microsoft-365", "deleting event %v: %v", deleteBookingRequest.BookingId, err)
+		return apiserver.Response(http.StatusBadRequest, nil), fmt.Errorf("server responded with error: %v", err)
+	}
 
-	// TODO: Uncomment the next line to return response Response(404, {}) or use other options such as http.Ok ...
-	// return Response(404, nil),nil
-
-	return apiserver.Response(http.StatusNotImplemented, nil), errors.New("BookingsBookingIdDelete method not implemented")
+	return apiserver.Response(http.StatusOK, nil), nil
 }
 
 // BookingsBookingIdRegisterGuestPost - Notify event organizer that a guest came for the event.
