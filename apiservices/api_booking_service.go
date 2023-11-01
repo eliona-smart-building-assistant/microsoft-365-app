@@ -115,7 +115,7 @@ func (s *BookingAPIService) BookingsAuthorizeGet(ctx context.Context, assetId st
 
 	errChan := make(chan error)
 	go func() {
-		err := graph.TestUserRequest(context.Background())
+		err := graph.InitiateAuthorization(context.Background())
 		if err != nil {
 			log.Debug("msgraph", "testing user request: %v", err)
 			errChan <- err

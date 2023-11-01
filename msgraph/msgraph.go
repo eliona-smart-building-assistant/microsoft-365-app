@@ -104,7 +104,7 @@ func (g *GraphHelper) completeAuth() error {
 	return nil
 }
 
-func (g *GraphHelper) TestUserRequest(ctx context.Context) error {
+func (g *GraphHelper) InitiateAuthorization(ctx context.Context) error {
 	_, err := g.userClient.Me().Get(ctx, nil)
 	return err
 }
