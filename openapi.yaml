@@ -283,18 +283,17 @@ paths:
         "400":
           description: Bad request (e.g., validation errors).
 
-  /bookings/{bookingId}:
-    delete:
+  /bookings/delete:
+    post:
       tags:
         - Booking
       summary: Cancel a booking
-      parameters:
-        - name: bookingId
-          in: path
-          description: The ID of the booking to be cancelled.
-          required: true
-          schema:
-            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeleteBookingRequest"
       responses:
         "204":
           description: Booking cancelled successfully.
@@ -588,10 +587,22 @@ components:
           type: string
           description: A description of the event or booking. (Optional)
       required:
+        - deviceCode
         - start
         - end
-        - email
-        - password
+    DeleteBookingRequest:
+      type: object
+      properties:
+        deviceCode:
+          type: string
+          description: Device code obtained from authorization
+          example: "3L10NA9Q7"
+        bookingId:
+          type: string
+          description: The booking ID obtained in the list of bookings.
+      required:
+        - deviceCode
+        - bookingId
 
     ProxyResponse:
       type: array

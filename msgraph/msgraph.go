@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"microsoft-365/apiserver"
-	"strings"
 	"time"
 
 	azcore "github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -668,7 +667,7 @@ func (g *GraphHelper) ListBookings(ctx context.Context, email, start, end string
 			return nil, fmt.Errorf("parsing datetime: %v", err)
 		}
 		booking := apiserver.Booking{
-			Id:            *event.GetId(),
+			Id:            *event.GetICalUId(),
 			Start:         startTime,
 			End:           endTime,
 			OrganizerID:   *event.GetOrganizer().GetEmailAddress().GetAddress(),
@@ -748,31 +747,23 @@ func (g *GraphHelper) CreateBooking(ctx context.Context, startDT, endDT, resourc
 }
 
 func (g *GraphHelper) DeleteBooking(ctx context.Context, bookingId string) error {
-	// TODO: Authorize the user?
+	filter := fmt.Sprintf("iCalUId eq '%s'", bookingId)
 
-	booking, err := deserializeBooking(bookingId)
+	events, err := g.userClient.Me().Events().Get(
+		ctx,
+		&users.ItemEventsRequestBuilderGetRequestConfiguration{
+			QueryParameters: &users.ItemEventsRequestBuilderGetQueryParameters{
+				Filter: &filter,
+			},
+		},
+	)
 	if err != nil {
-		return fmt.Errorf("deserializing booking ID %v\nerror: %v", bookingId, err)
+		return fmt.Errorf("fetching events: %v", err)
 	}
-	return g.userClient.Users().ByUserId(booking.Email).Events().ByEventId(booking.ID).Delete(ctx, nil)
-}
-
-type booking struct {
-	ID    string
-	Email string
-}
-
-func (e *booking) serialize() string {
-	return fmt.Sprintf("%s/%s", e.ID, e.Email)
-}
-
-func deserializeBooking(data string) (booking, error) {
-	parts := strings.Split(data, "/")
-	if len(parts) != 2 {
-		return booking{}, fmt.Errorf("invalid format")
+	if len(events.GetValue()) != 1 {
+		return fmt.Errorf("found %v != 1 events with bookingId %s", len(events.GetValue()), bookingId)
 	}
-	return booking{
-		ID:    parts[0],
-		Email: parts[1],
-	}, nil
+	event := events.GetValue()[0]
+	// No, we can't use query parameters in DELETE request. ¯\_(ツ)_/¯
+	return g.userClient.Me().Events().ByEventId(*event.GetId()).Delete(ctx, nil)
 }
