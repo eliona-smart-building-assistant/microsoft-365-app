@@ -319,6 +319,9 @@ paths:
             schema:
               type: object
               properties:
+                notificationRecipient:
+                  type: string
+                  description: The Eliona user to send the message to.
                 messageEn:
                   type: string
                   description: The content of the message to be sent to the organizer.
