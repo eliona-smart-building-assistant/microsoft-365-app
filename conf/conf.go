@@ -211,7 +211,7 @@ func GetConfigsForProxyWithProjectId(ctx context.Context, projectId string) ([]a
 			for_proxy = true AND
 			$1 = ANY (project_ids)
 	`)
-	if err := queries.RawG(q).BindG(ctx, dbConfigs); err != nil {
+	if err := queries.RawG(q, projectId).BindG(ctx, dbConfigs); err != nil {
 		return nil, fmt.Errorf("fetching configuration: %v", err)
 	}
 
