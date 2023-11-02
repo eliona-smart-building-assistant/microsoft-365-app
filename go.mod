@@ -8,9 +8,9 @@ require (
 	github.com/eliona-smart-building-assistant/go-eliona v1.9.19
 	github.com/eliona-smart-building-assistant/go-utils v1.0.44
 	github.com/gorilla/mux v1.8.0
-	github.com/microsoft/kiota-abstractions-go v1.3.0
+	github.com/microsoft/kiota-abstractions-go v1.3.1
 	github.com/microsoft/kiota-authentication-azure-go v1.0.1
-	github.com/microsoftgraph/msgraph-sdk-go v1.23.0
+	github.com/microsoftgraph/msgraph-sdk-go v1.24.0
 	github.com/microsoftgraph/msgraph-sdk-go-core v1.0.0
 	github.com/volatiletech/null/v8 v8.1.2
 	github.com/volatiletech/sqlboiler/v4 v4.15.0
@@ -23,11 +23,11 @@ require (
 	github.com/cjlapao/common-go v0.0.39 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/ericlagergren/decimal v0.0.0-20221120152707-495c53812d05 // indirect
-	github.com/go-logr/logr v1.2.4 // indirect
+	github.com/go-logr/logr v1.3.0 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/gofrs/uuid v4.4.0+incompatible // indirect
 	github.com/golang-jwt/jwt/v5 v5.0.0 // indirect
-	github.com/google/uuid v1.3.1 // indirect
+	github.com/google/uuid v1.4.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/microsoft/kiota-http-go v1.1.0 // indirect

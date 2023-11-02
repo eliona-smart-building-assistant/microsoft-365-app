@@ -28,6 +28,8 @@ import (
 	"sync"
 	"time"
 
+	api "github.com/eliona-smart-building-assistant/go-eliona-api-client/v2"
+	"github.com/eliona-smart-building-assistant/go-eliona/client"
 	"github.com/eliona-smart-building-assistant/go-utils/log"
 )
 
@@ -197,17 +199,53 @@ func (s *BookingAPIService) BookingsDeletePost(ctx context.Context, deleteBookin
 
 // BookingsBookingIdRegisterGuestPost - Notify event organizer that a guest came for the event.
 func (s *BookingAPIService) BookingsBookingIdRegisterGuestPost(ctx context.Context, bookingId string, bookingsBookingIdRegisterGuestPostRequest apiserver.BookingsBookingIdRegisterGuestPostRequest) (apiserver.ImplResponse, error) {
-	// TODO - update BookingsBookingIdRegisterGuestPost with the required logic for this service method.
-	// Add api_booking_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+	configs, err := conf.GetConfigsForProxy(ctx)
+	if err != nil {
+		return apiserver.Response(http.StatusInternalServerError, nil), fmt.Errorf("finding config for proxy: %v", err)
+	} else if len(configs) == 0 {
+		return apiserver.Response(http.StatusInternalServerError, nil), fmt.Errorf("found no config for proxy")
+	}
+	config := configs[0]
+	graph := msgraph.NewGraphHelper()
+	if config.ClientSecret == nil || config.Username == nil || config.Password == nil {
+		log.Error("conf", "Shouldn't happen: some values are nil")
+		return apiserver.Response(http.StatusInternalServerError, nil), fmt.Errorf("internal server error")
+	}
+	if err := graph.InitializeGraph(config.ClientId, config.TenantId, *config.ClientSecret, *config.Username, *config.Password); err != nil {
+		log.Error("microsoft-365", "initializing graph for user auth: %v", err)
+		return apiserver.Response(http.StatusInternalServerError, nil), fmt.Errorf("internal server error")
+	}
 
-	// TODO: Uncomment the next line to return response Response(204, {}) or use other options such as http.Ok ...
-	// return Response(204, nil),nil
+	e, err := graph.FindBookingByICalUID(ctx, bookingId)
+	if err != nil {
+		return apiserver.Response(http.StatusBadRequest, nil), fmt.Errorf("finding requested booking: %v", err)
+	}
+	event := *e
+	recipient := *event.GetOrganizer().GetEmailAddress().GetAddress()
+	message := *api.NewMessage([]string{recipient}, bookingsBookingIdRegisterGuestPostRequest.MessageEn)
 
-	// TODO: Uncomment the next line to return response Response(404, {}) or use other options such as http.Ok ...
-	// return Response(404, nil),nil
+	_, _, err = client.NewClient().CommunicationAPI.PostMail(client.AuthenticationContext()).Message(message).Execute()
+	if err != nil {
+		log.Error("eliona", "calling CommunicationAPI.PostMail: %v", err)
+		return apiserver.Response(http.StatusInternalServerError, nil), fmt.Errorf("internal server error")
+	}
 
-	// TODO: Uncomment the next line to return response Response(400, {}) or use other options such as http.Ok ...
-	// return Response(400, nil),nil
+	ntf := api.NullableTranslation{}
+	ntf.Set(&api.Translation{
+		En: &bookingsBookingIdRegisterGuestPostRequest.MessageEn,
+		De: &bookingsBookingIdRegisterGuestPostRequest.MessageDe,
+		Fr: &bookingsBookingIdRegisterGuestPostRequest.MessageFr,
+		It: &bookingsBookingIdRegisterGuestPostRequest.MessageIt,
+	})
+	notification := *api.NewNotification(recipient, ntf)
 
-	return apiserver.Response(http.StatusNotImplemented, nil), errors.New("BookingsBookingIdRegisterGuestPost method not implemented")
+	configuration := api.NewConfiguration()
+	apiClient := api.NewAPIClient(configuration)
+	_, _, err = apiClient.CommunicationAPI.PostNotification(context.Background()).Notification(notification).Execute()
+	if err != nil {
+		log.Error("eliona", "calling CommunicationAPI.PostNotification: %v", err)
+		return apiserver.Response(http.StatusInternalServerError, nil), fmt.Errorf("internal server error")
+	}
+
+	return apiserver.Response(http.StatusOK, nil), nil
 }

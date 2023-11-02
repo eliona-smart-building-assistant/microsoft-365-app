@@ -12,16 +12,22 @@ package apiserver
 type BookingsBookingIdRegisterGuestPostRequest struct {
 
 	// The content of the message to be sent to the organizer.
-	Content string `json:"content"`
+	MessageEn string `json:"messageEn"`
 
-	// The Eliona user to send the message to
-	NotificationRecipient string `json:"notificationRecipient,omitempty"`
+	// The content of the message to be sent to the organizer.
+	MessageDe string `json:"messageDe,omitempty"`
+
+	// The content of the message to be sent to the organizer.
+	MessageFr string `json:"messageFr,omitempty"`
+
+	// The content of the message to be sent to the organizer.
+	MessageIt string `json:"messageIt,omitempty"`
 }
 
 // AssertBookingsBookingIdRegisterGuestPostRequestRequired checks if the required fields are not zero-ed
 func AssertBookingsBookingIdRegisterGuestPostRequestRequired(obj BookingsBookingIdRegisterGuestPostRequest) error {
 	elements := map[string]interface{}{
-		"content": obj.Content,
+		"messageEn": obj.MessageEn,
 	}
 	for name, el := range elements {
 		if isZero := IsZeroValue(el); isZero {

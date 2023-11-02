@@ -109,73 +109,6 @@ func (g *GraphHelper) InitiateAuthorization(ctx context.Context) error {
 	return err
 }
 
-func (g *GraphHelper) GetUserToken() (*string, error) {
-	token, err := g.credential.GetToken(context.Background(), policy.TokenRequestOptions{
-		Scopes: g.graphUserScopes,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return &token.Token, nil
-}
-
-func (g *GraphHelper) GetUser() (models.Userable, error) {
-	query := users.UserItemRequestBuilderGetQueryParameters{
-		// Only request specific properties
-		Select: []string{"displayName", "mail", "userPrincipalName"},
-	}
-
-	return g.userClient.Me().Get(context.Background(),
-		&users.UserItemRequestBuilderGetRequestConfiguration{
-			QueryParameters: &query,
-		})
-}
-
-func (g *GraphHelper) GetInbox() (models.MessageCollectionResponseable, error) {
-	var topValue int32 = 25
-	query := users.ItemMailFoldersItemMessagesRequestBuilderGetQueryParameters{
-		// Only request specific properties
-		Select: []string{"from", "isRead", "receivedDateTime", "subject"},
-		// Get at most 25 results
-		Top: &topValue,
-		// Sort by received time, newest first
-		Orderby: []string{"receivedDateTime DESC"},
-	}
-
-	return g.userClient.Me().MailFolders().
-		ByMailFolderId("inbox").
-		Messages().
-		Get(context.Background(),
-			&users.ItemMailFoldersItemMessagesRequestBuilderGetRequestConfiguration{
-				QueryParameters: &query,
-			})
-}
-
-func (g *GraphHelper) SendMail(subject *string, body *string, recipient *string) error {
-	message := models.NewMessage()
-	message.SetSubject(subject)
-
-	messageBody := models.NewItemBody()
-	messageBody.SetContent(body)
-	contentType := models.TEXT_BODYTYPE
-	messageBody.SetContentType(&contentType)
-	message.SetBody(messageBody)
-
-	toRecipient := models.NewRecipient()
-	emailAddress := models.NewEmailAddress()
-	emailAddress.SetAddress(recipient)
-	toRecipient.SetEmailAddress(emailAddress)
-	message.SetToRecipients([]models.Recipientable{
-		toRecipient,
-	})
-
-	sendMailBody := users.NewItemSendMailPostRequestBody()
-	sendMailBody.SetMessage(message)
-
-	return g.userClient.Me().SendMail().Post(context.Background(), sendMailBody, nil)
-}
-
 type PhysicalAddress struct {
 	City            *string
 	CountryOrRegion *string
@@ -747,9 +680,44 @@ func (g *GraphHelper) CreateBooking(ctx context.Context, startDT, endDT, resourc
 }
 
 func (g *GraphHelper) DeleteBooking(ctx context.Context, bookingId string) error {
-	filter := fmt.Sprintf("iCalUId eq '%s'", bookingId)
+	e, err := g.FindBookingByICalUID(ctx, bookingId)
+	if err != nil {
+		return err
+	}
+	event := *e
+	// No, we can't use query parameters in DELETE request. Therefore no lookup by ICalUID¯\_(ツ)_/¯
+	return g.userClient.Me().Events().ByEventId(*event.GetId()).Delete(ctx, nil)
+}
 
-	events, err := g.userClient.Me().Events().Get(
+func (g *GraphHelper) getRandomUser() (models.Userable, error) {
+	one := int32(1)
+	query := users.UsersRequestBuilderGetQueryParameters{
+		Select: []string{"userPrincipalName"},
+		Top:    &one,
+	}
+
+	usersCollection, err := g.userClient.Users().Get(context.Background(),
+		&users.UsersRequestBuilderGetRequestConfiguration{
+			QueryParameters: &query,
+		})
+	if err != nil {
+		return nil, err
+	}
+	users := usersCollection.GetValue()
+	if len(users) != 1 {
+		return nil, fmt.Errorf("cannot get one random user")
+	}
+	return users[0], nil
+}
+
+func (g *GraphHelper) FindBookingByICalUID(ctx context.Context, id string) (*models.Eventable, error) {
+	someUser, err := g.getRandomUser()
+	if err != nil {
+		return nil, fmt.Errorf("fetching some user: %v", err)
+	}
+	filter := fmt.Sprintf("iCalUId eq '%s'", id)
+
+	events, err := g.userClient.Users().ByUserId(*someUser.GetUserPrincipalName()).Events().Get(
 		ctx,
 		&users.ItemEventsRequestBuilderGetRequestConfiguration{
 			QueryParameters: &users.ItemEventsRequestBuilderGetQueryParameters{
@@ -758,12 +726,10 @@ func (g *GraphHelper) DeleteBooking(ctx context.Context, bookingId string) error
 		},
 	)
 	if err != nil {
-		return fmt.Errorf("fetching events: %v", err)
+		return nil, fmt.Errorf("fetching events: %v", err)
 	}
 	if len(events.GetValue()) != 1 {
-		return fmt.Errorf("found %v != 1 events with bookingId %s", len(events.GetValue()), bookingId)
+		return nil, fmt.Errorf("found %v != 1 events with bookingId %s", len(events.GetValue()), id)
 	}
-	event := events.GetValue()[0]
-	// No, we can't use query parameters in DELETE request. ¯\_(ツ)_/¯
-	return g.userClient.Me().Events().ByEventId(*event.GetId()).Delete(ctx, nil)
+	return &events.GetValue()[0], nil
 }
