@@ -11,6 +11,9 @@ package apiserver
 
 type BookingsBookingIdRegisterGuestPostRequest struct {
 
+	// The Eliona user to send the message to.
+	NotificationRecipient string `json:"notificationRecipient,omitempty"`
+
 	// The content of the message to be sent to the organizer.
 	MessageEn string `json:"messageEn"`
 

@@ -199,33 +199,9 @@ func (s *BookingAPIService) BookingsDeletePost(ctx context.Context, deleteBookin
 
 // BookingsBookingIdRegisterGuestPost - Notify event organizer that a guest came for the event.
 func (s *BookingAPIService) BookingsBookingIdRegisterGuestPost(ctx context.Context, bookingId string, bookingsBookingIdRegisterGuestPostRequest apiserver.BookingsBookingIdRegisterGuestPostRequest) (apiserver.ImplResponse, error) {
-	configs, err := conf.GetConfigsForProxy(ctx)
-	if err != nil {
-		return apiserver.Response(http.StatusInternalServerError, nil), fmt.Errorf("finding config for proxy: %v", err)
-	} else if len(configs) == 0 {
-		return apiserver.Response(http.StatusInternalServerError, nil), fmt.Errorf("found no config for proxy")
-	}
-	config := configs[0]
-	graph := msgraph.NewGraphHelper()
-	if config.ClientSecret == nil || config.Username == nil || config.Password == nil {
-		log.Error("conf", "Shouldn't happen: some values are nil")
-		return apiserver.Response(http.StatusInternalServerError, nil), fmt.Errorf("internal server error")
-	}
-	if err := graph.InitializeGraph(config.ClientId, config.TenantId, *config.ClientSecret, *config.Username, *config.Password); err != nil {
-		log.Error("microsoft-365", "initializing graph for user auth: %v", err)
-		return apiserver.Response(http.StatusInternalServerError, nil), fmt.Errorf("internal server error")
-	}
+	message := *api.NewMessage([]string{bookingsBookingIdRegisterGuestPostRequest.NotificationRecipient}, bookingsBookingIdRegisterGuestPostRequest.MessageEn)
 
-	e, err := graph.FindBookingByICalUID(ctx, bookingId)
-	if err != nil {
-		return apiserver.Response(http.StatusBadRequest, nil), fmt.Errorf("finding requested booking: %v", err)
-	}
-	event := *e
-	recipient := *event.GetOrganizer().GetEmailAddress().GetAddress()
-	message := *api.NewMessage([]string{recipient}, bookingsBookingIdRegisterGuestPostRequest.MessageEn)
-
-	_, _, err = client.NewClient().CommunicationAPI.PostMail(client.AuthenticationContext()).Message(message).Execute()
-	if err != nil {
+	if _, _, err := client.NewClient().CommunicationAPI.PostMail(client.AuthenticationContext()).Message(message).Execute(); err != nil {
 		log.Error("eliona", "calling CommunicationAPI.PostMail: %v", err)
 		return apiserver.Response(http.StatusInternalServerError, nil), fmt.Errorf("internal server error")
 	}
@@ -237,12 +213,9 @@ func (s *BookingAPIService) BookingsBookingIdRegisterGuestPost(ctx context.Conte
 		Fr: &bookingsBookingIdRegisterGuestPostRequest.MessageFr,
 		It: &bookingsBookingIdRegisterGuestPostRequest.MessageIt,
 	})
-	notification := *api.NewNotification(recipient, ntf)
+	notification := *api.NewNotification(bookingsBookingIdRegisterGuestPostRequest.NotificationRecipient, ntf)
 
-	configuration := api.NewConfiguration()
-	apiClient := api.NewAPIClient(configuration)
-	_, _, err = apiClient.CommunicationAPI.PostNotification(context.Background()).Notification(notification).Execute()
-	if err != nil {
+	if _, _, err := client.NewClient().CommunicationAPI.PostNotification(client.AuthenticationContext()).Notification(notification).Execute(); err != nil {
 		log.Error("eliona", "calling CommunicationAPI.PostNotification: %v", err)
 		return apiserver.Response(http.StatusInternalServerError, nil), fmt.Errorf("internal server error")
 	}
