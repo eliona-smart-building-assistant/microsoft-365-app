@@ -211,7 +211,7 @@ func GetConfigsForProxyWithProjectId(ctx context.Context, projectId string) ([]a
 			for_proxy = true AND
 			$1 = ANY (project_ids)
 	`)
-	if err := queries.RawG(q).BindG(ctx, dbConfigs); err != nil {
+	if err := queries.RawG(q, projectId).BindG(ctx, dbConfigs); err != nil {
 		return nil, fmt.Errorf("fetching configuration: %v", err)
 	}
 
@@ -255,12 +255,14 @@ func SetAllConfigsInactive(ctx context.Context) (int64, error) {
 	})
 }
 
-func InsertAsset(ctx context.Context, config apiserver.Configuration, projId string, globalAssetID string, assetId int32) error {
-	var dbAsset appdb.Asset
-	dbAsset.ConfigurationID = null.Int64FromPtr(config.Id).Int64
-	dbAsset.ProjectID = projId
-	dbAsset.GlobalAssetID = globalAssetID
-	dbAsset.AssetID = null.Int32From(assetId)
+func InsertAsset(ctx context.Context, config apiserver.Configuration, projId string, globalAssetID string, assetId int32, email string) error {
+	dbAsset := appdb.Asset{
+		ConfigurationID: null.Int64FromPtr(config.Id).Int64,
+		ProjectID:       projId,
+		GlobalAssetID:   globalAssetID,
+		AssetID:         null.Int32From(assetId),
+		Email:           email,
+	}
 	return dbAsset.InsertG(ctx, boil.Infer())
 }
 
@@ -274,4 +276,10 @@ func GetAssetId(ctx context.Context, config apiserver.Configuration, projId stri
 		return nil, err
 	}
 	return common.Ptr(dbAsset[0].AssetID.Int32), nil
+}
+
+func GetAsset(ctx context.Context, assetId int32) (*appdb.Asset, error) {
+	return appdb.Assets(
+		appdb.AssetWhere.AssetID.EQ(null.Int32From(assetId)),
+	).OneG(ctx)
 }

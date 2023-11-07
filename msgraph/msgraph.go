@@ -33,6 +33,31 @@ func NewGraphHelper() *GraphHelper {
 	return g
 }
 
+func (g *GraphHelper) InitializeGraphForUserAuth(clientId, tenantId string, deviceCode chan string) error {
+	// TODO: This would be better handled by Authorization code credential, but the current
+	// Microsoft Graph Go SDK does not implement it. We must therefore hack around it with device
+	// code.
+	// Also to note, the Interactive flow just tries to open a browser using gtk.
+	//
+	// IMPORTANT: Needs "Allow public client flows" in Entra[1].
+	// [1]https://github.com/microsoftgraph/msgraph-sdk-python-core/issues/153#issuecomment-1785682746
+	credential, err := azidentity.NewDeviceCodeCredential(&azidentity.DeviceCodeCredentialOptions{
+		ClientID: clientId,
+		TenantID: tenantId,
+		UserPrompt: func(ctx context.Context, message azidentity.DeviceCodeMessage) error {
+			deviceCode <- message.UserCode
+			return nil
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("Creating the device code credential: %v", err)
+	}
+	g.credential = credential
+	g.credential.GetToken(context.Background(), policy.TokenRequestOptions{})
+
+	return g.completeAuth()
+}
+
 func (g *GraphHelper) InitializeGraph(clientId, tenantId, clientSecret, username, password string) error {
 	if username != "" {
 		cred, err := azidentity.NewUsernamePasswordCredential(
@@ -55,26 +80,33 @@ func (g *GraphHelper) InitializeGraph(clientId, tenantId, clientSecret, username
 			nil,
 		)
 		if err != nil {
-			return fmt.Errorf("creating the device code credential: %v", err)
+			return fmt.Errorf("creating the client secret credential: %v", err)
 		}
 		g.credential = cred
 		g.isDelegated = false
 	}
 
+	return g.completeAuth()
+}
+
+func (g *GraphHelper) completeAuth() error {
 	authProvider, err := auth.NewAzureIdentityAuthenticationProviderWithScopes(g.credential, g.graphUserScopes)
 	if err != nil {
-		return fmt.Errorf("Creating an auth provider: %v", err)
+		return fmt.Errorf("creating an auth provider: %v", err)
 	}
 
 	adapter, err := msgraphsdk.NewGraphRequestAdapter(authProvider)
 	if err != nil {
-		return fmt.Errorf("Creating a request adapter: %v", err)
+		return fmt.Errorf("creating a request adapter: %v", err)
 	}
 
-	client := msgraphsdk.NewGraphServiceClient(adapter)
-	g.userClient = client
-
+	g.userClient = msgraphsdk.NewGraphServiceClient(adapter)
 	return nil
+}
+
+func (g *GraphHelper) InitiateAuthorization(ctx context.Context) error {
+	_, err := g.userClient.Me().Get(ctx, nil)
+	return err
 }
 
 func (g *GraphHelper) GetUserToken() (*string, error) {
@@ -525,7 +557,6 @@ func fetchSchedules[T GraphAsset](g *GraphHelper, rooms map[string]T) (map[strin
 			return true
 		}
 		scheduleID := *sID
-		fmt.Println(scheduleID)
 
 		room := rooms[scheduleID]
 		scheduleItems := schedule.GetScheduleItems()
@@ -605,4 +636,134 @@ func convertToEquipment(u models.User) Equipment {
 		DisplayName:  u.GetDisplayName(),
 		EmailAddress: u.GetUserPrincipalName(),
 	}
+}
+
+//
+
+func (g *GraphHelper) ListBookings(ctx context.Context, email, start, end string) ([]apiserver.Booking, error) {
+	filter := fmt.Sprintf("start/dateTime ge '%s' and end/dateTime le '%s'", start, end)
+
+	events, err := g.userClient.Users().ByUserId(email).Events().Get(
+		ctx,
+		&users.ItemEventsRequestBuilderGetRequestConfiguration{
+			QueryParameters: &users.ItemEventsRequestBuilderGetQueryParameters{
+				Filter: &filter,
+			},
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("fetching events: %v", err)
+	}
+
+	var bookings []apiserver.Booking
+	for _, event := range events.GetValue() {
+		layout := "2006-01-02T15:04:05.9999999"
+		startTime, err := time.Parse(layout, *event.GetStart().GetDateTime())
+		if err != nil {
+			return nil, fmt.Errorf("parsing datetime: %v", err)
+		}
+		endTime, err := time.Parse(layout, *event.GetEnd().GetDateTime())
+		if err != nil {
+			return nil, fmt.Errorf("parsing datetime: %v", err)
+		}
+		booking := apiserver.Booking{
+			Id:            *event.GetICalUId(),
+			Start:         startTime,
+			End:           endTime,
+			OrganizerID:   *event.GetOrganizer().GetEmailAddress().GetAddress(),
+			OrganizerName: *event.GetOrganizer().GetEmailAddress().GetName(),
+		}
+		bookings = append(bookings, booking)
+	}
+	return bookings, nil
+}
+
+func (g *GraphHelper) CreateBooking(ctx context.Context, startDT, endDT, resourceEmail, subject, description string) error {
+	// {
+	//     "subject": "Meeet",
+	//     "body": {
+	//         "contentType": "HTML",
+	//         "content": "Does this time work for you?"
+	//     },
+	//     "start": {
+	//         "dateTime": "2023-10-26T13:29:11.861Z",
+	//         "timeZone": "UTC"
+	//     },
+	//     "end": {
+	//         "dateTime": "2023-10-26T14:29:11.861Z",
+	//         "timeZone": "UTC"
+	//     },
+	//     "attendees": [
+	//         {
+	//             "emailAddress": {
+	//                 "address": "small.table@z0vmd.onmicrosoft.com"
+	//             },
+	//             "type": "Required"
+	//         }
+	//     ],
+	//     "location": {
+	//         "displayName": "Small Table"
+	//     }
+	// }
+	requestBody := models.NewEvent()
+	timeZone := "UTC"
+
+	requestBody.SetSubject(&subject)
+
+	body := models.NewItemBody()
+	contentType := models.HTML_BODYTYPE
+	body.SetContentType(&contentType)
+	body.SetContent(&description)
+	requestBody.SetBody(body)
+
+	start := models.NewDateTimeTimeZone()
+	start.SetTimeZone(&timeZone)
+	start.SetDateTime(&startDT)
+	requestBody.SetStart(start)
+	end := models.NewDateTimeTimeZone()
+	end.SetDateTime(&endDT)
+	end.SetTimeZone(&timeZone)
+	requestBody.SetEnd(end)
+
+	attendee := models.NewAttendee()
+	emailAddress := models.NewEmailAddress()
+	emailAddress.SetAddress(&resourceEmail)
+	attendee.SetEmailAddress(emailAddress)
+	tpe := models.REQUIRED_ATTENDEETYPE
+	attendee.SetTypeEscaped(&tpe)
+	attendees := []models.Attendeeable{
+		attendee,
+	}
+	requestBody.SetAttendees(attendees)
+	location := models.NewLocation()
+	location.SetDisplayName(&resourceEmail)
+	requestBody.SetLocation(location)
+
+	_, err := g.userClient.Me().Events().Post(ctx, requestBody, nil)
+	if err != nil {
+		return fmt.Errorf("creating event: %v", err)
+	}
+	return nil
+}
+
+func (g *GraphHelper) DeleteBooking(ctx context.Context, bookingId string) error {
+	filter := fmt.Sprintf("iCalUId eq '%s'", bookingId)
+
+	events, err := g.userClient.Me().Events().Get(
+		ctx,
+		&users.ItemEventsRequestBuilderGetRequestConfiguration{
+			QueryParameters: &users.ItemEventsRequestBuilderGetQueryParameters{
+				Filter: &filter,
+			},
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("fetching events: %v", err)
+	}
+	if len(events.GetValue()) != 1 {
+		return fmt.Errorf("found %v != 1 events with bookingId %s", len(events.GetValue()), bookingId)
+	}
+	event := events.GetValue()[0]
+	// No, we can't use query parameters in DELETE request. ¯\_(ツ)_/¯
+	return g.userClient.Me().Events().ByEventId(*event.GetId()).Delete(ctx, nil)
 }

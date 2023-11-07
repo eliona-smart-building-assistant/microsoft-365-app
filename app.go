@@ -144,6 +144,7 @@ func listenApi() {
 		apiserver.NewConfigurationAPIController(apiservices.NewConfigurationApiService()),
 		apiserver.NewVersionAPIController(apiservices.NewVersionApiService()),
 		apiserver.NewCustomizationAPIController(apiservices.NewCustomizationApiService()),
+		apiserver.NewBookingAPIController(apiservices.NewBookingAPIService()),
 	)))
 
 	err := http.ListenAndServe(":"+common.Getenv("API_SERVER_PORT", "3000"), r)
