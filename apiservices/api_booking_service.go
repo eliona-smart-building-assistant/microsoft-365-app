@@ -182,15 +182,15 @@ func (s *BookingAPIService) BookingsPost(ctx context.Context, createBookingReque
 	return apiserver.Response(http.StatusOK, nil), nil
 }
 
-// BookingsBookingIdDelete - Cancel a booking
-func (s *BookingAPIService) BookingsDeletePost(ctx context.Context, deleteBookingRequest apiserver.DeleteBookingRequest) (apiserver.ImplResponse, error) {
+// BookingsBookingIdDeletePost - Cancel a booking
+func (s *BookingAPIService) BookingsBookingIdDeletePost(ctx context.Context, bookingId string, deleteBookingRequest apiserver.DeleteBookingRequest) (apiserver.ImplResponse, error) {
 	session, ok := s.sessions[deleteBookingRequest.DeviceCode]
 	if !ok {
 		return apiserver.Response(http.StatusBadRequest, nil), errors.New("invalid device code")
 	}
 
-	if err := session.graph.DeleteBooking(ctx, deleteBookingRequest.BookingId); err != nil {
-		log.Error("microsoft-365", "deleting event %v: %v", deleteBookingRequest.BookingId, err)
+	if err := session.graph.DeleteBooking(ctx, bookingId); err != nil {
+		log.Error("microsoft-365", "deleting event %v: %v", bookingId, err)
 		return apiserver.Response(http.StatusBadRequest, nil), fmt.Errorf("server responded with error: %v", err)
 	}
 

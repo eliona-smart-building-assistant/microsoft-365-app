@@ -13,16 +13,12 @@ type DeleteBookingRequest struct {
 
 	// Device code obtained from authorization
 	DeviceCode string `json:"deviceCode"`
-
-	// The booking ID obtained in the list of bookings.
-	BookingId string `json:"bookingId"`
 }
 
 // AssertDeleteBookingRequestRequired checks if the required fields are not zero-ed
 func AssertDeleteBookingRequestRequired(obj DeleteBookingRequest) error {
 	elements := map[string]interface{}{
 		"deviceCode": obj.DeviceCode,
-		"bookingId":  obj.BookingId,
 	}
 	for name, el := range elements {
 		if isZero := IsZeroValue(el); isZero {
