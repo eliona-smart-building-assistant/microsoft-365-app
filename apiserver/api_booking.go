@@ -55,15 +55,15 @@ func (c *BookingAPIController) Routes() Routes {
 			"/v1/bookings/authorize",
 			c.BookingsAuthorizeGet,
 		},
+		"BookingsBookingIdDeletePost": Route{
+			strings.ToUpper("Post"),
+			"/v1/bookings/{bookingId}/delete",
+			c.BookingsBookingIdDeletePost,
+		},
 		"BookingsBookingIdRegisterGuestPost": Route{
 			strings.ToUpper("Post"),
 			"/v1/bookings/{bookingId}/registerGuest",
 			c.BookingsBookingIdRegisterGuestPost,
-		},
-		"BookingsDeletePost": Route{
-			strings.ToUpper("Post"),
-			"/v1/bookings/delete",
-			c.BookingsDeletePost,
 		},
 		"BookingsGet": Route{
 			strings.ToUpper("Get"),
@@ -83,6 +83,35 @@ func (c *BookingAPIController) BookingsAuthorizeGet(w http.ResponseWriter, r *ht
 	query := r.URL.Query()
 	assetIdParam := query.Get("assetId")
 	result, err := c.service.BookingsAuthorizeGet(r.Context(), assetIdParam)
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result)
+		return
+	}
+	// If no error, encode the body and the result code
+	EncodeJSONResponse(result.Body, &result.Code, w)
+}
+
+// BookingsBookingIdDeletePost - Cancel a booking
+func (c *BookingAPIController) BookingsBookingIdDeletePost(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	bookingIdParam := params["bookingId"]
+	deleteBookingRequestParam := DeleteBookingRequest{}
+	d := json.NewDecoder(r.Body)
+	d.DisallowUnknownFields()
+	if err := d.Decode(&deleteBookingRequestParam); err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		return
+	}
+	if err := AssertDeleteBookingRequestRequired(deleteBookingRequestParam); err != nil {
+		c.errorHandler(w, r, err, nil)
+		return
+	}
+	if err := AssertDeleteBookingRequestConstraints(deleteBookingRequestParam); err != nil {
+		c.errorHandler(w, r, err, nil)
+		return
+	}
+	result, err := c.service.BookingsBookingIdDeletePost(r.Context(), bookingIdParam, deleteBookingRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)
@@ -112,33 +141,6 @@ func (c *BookingAPIController) BookingsBookingIdRegisterGuestPost(w http.Respons
 		return
 	}
 	result, err := c.service.BookingsBookingIdRegisterGuestPost(r.Context(), bookingIdParam, bookingsBookingIdRegisterGuestPostRequestParam)
-	// If an error occurred, encode the error with the status code
-	if err != nil {
-		c.errorHandler(w, r, err, &result)
-		return
-	}
-	// If no error, encode the body and the result code
-	EncodeJSONResponse(result.Body, &result.Code, w)
-}
-
-// BookingsDeletePost - Cancel a booking
-func (c *BookingAPIController) BookingsDeletePost(w http.ResponseWriter, r *http.Request) {
-	deleteBookingRequestParam := DeleteBookingRequest{}
-	d := json.NewDecoder(r.Body)
-	d.DisallowUnknownFields()
-	if err := d.Decode(&deleteBookingRequestParam); err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
-		return
-	}
-	if err := AssertDeleteBookingRequestRequired(deleteBookingRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
-		return
-	}
-	if err := AssertDeleteBookingRequestConstraints(deleteBookingRequestParam); err != nil {
-		c.errorHandler(w, r, err, nil)
-		return
-	}
-	result, err := c.service.BookingsDeletePost(r.Context(), deleteBookingRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)
