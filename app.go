@@ -27,13 +27,30 @@ import (
 	"sync"
 	"time"
 
+	"github.com/eliona-smart-building-assistant/go-eliona/app"
+	"github.com/eliona-smart-building-assistant/go-eliona/asset"
 	"github.com/eliona-smart-building-assistant/go-utils/common"
+	"github.com/eliona-smart-building-assistant/go-utils/db"
 	utilshttp "github.com/eliona-smart-building-assistant/go-utils/http"
 	"github.com/eliona-smart-building-assistant/go-utils/log"
 	"github.com/gorilla/mux"
 )
 
 var once sync.Once
+
+func initialize() {
+	ctx := context.Background()
+
+	// Necessary to close used init resources
+	conn := db.NewInitConnectionWithContextAndApplicationName(ctx, app.AppName())
+	defer conn.Close(ctx)
+
+	// Init the app before the first run.
+	app.Init(conn, app.AppName(),
+		app.ExecSqlFile("conf/init.sql"),
+		asset.InitAssetTypeFiles("eliona/asset-type-*.json"),
+	)
+}
 
 // collectData is the main app function which is called periodically
 func collectData() {
