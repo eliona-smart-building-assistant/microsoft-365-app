@@ -1,6 +1,6 @@
 {
   "name": "microsoft-365",
-  "elionaMinVersion": "v11.0.0",
+  "elionaMinVersion": "v12.0.0",
   "displayName": {
     "en": "Microsoft 365",
     "de": "Microsoft 365"
@@ -15,6 +15,7 @@
   "documentationUrl": "https://doc.eliona.io/collection/eliona-apps/apps/microsoft-365",
   "useEnvironment": [
     "CONNECTION_STRING",
+    "INIT_CONNECTION_STRING",
     "API_ENDPOINT",
     "API_TOKEN"
   ]
