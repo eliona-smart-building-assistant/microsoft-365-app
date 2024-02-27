@@ -5,8 +5,8 @@ go 1.20
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.9.2
 	github.com/eliona-smart-building-assistant/app-integration-tests v1.1.2
-	github.com/eliona-smart-building-assistant/go-eliona v1.9.31
-	github.com/eliona-smart-building-assistant/go-utils v1.0.61
+	github.com/eliona-smart-building-assistant/go-eliona v1.9.32
+	github.com/eliona-smart-building-assistant/go-utils v1.0.62
 	github.com/gorilla/mux v1.8.1
 	github.com/microsoft/kiota-abstractions-go v1.5.6
 	github.com/microsoft/kiota-authentication-azure-go v1.0.2
@@ -68,7 +68,7 @@ require (
 	github.com/spf13/cast v1.6.0 // indirect
 	github.com/volatiletech/inflect v0.0.1 // indirect
 	github.com/volatiletech/strmangle v0.0.6
-	golang.org/x/crypto v0.19.0 // indirect
+	golang.org/x/crypto v0.20.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 )
