@@ -12,7 +12,7 @@
   "dashboardTemplateNames": [],
   "apiUrl": "v1",
   "apiSpecificationPath": "/version/openapi.json",
-  "documentationUrl": "https://doc.eliona.io/collection/eliona-apps/apps/microsoft-365",
+  "documentationUrl": "https://doc.eliona.io/collection/v/eliona-english/eliona-apps/apps/microsoft-365",
   "useEnvironment": [
     "CONNECTION_STRING",
     "INIT_CONNECTION_STRING",
