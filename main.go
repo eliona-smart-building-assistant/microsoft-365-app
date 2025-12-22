@@ -18,7 +18,7 @@ package main
 import (
 	"context"
 	"github.com/aarondl/sqlboiler/v4/boil"
-	"microsoft-365/conf"
+	"microsoft-365/v2/conf"
 	"time"
 
 	"github.com/eliona-smart-building-assistant/go-utils/common"

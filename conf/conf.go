@@ -27,8 +27,8 @@ import (
 	"github.com/eliona-smart-building-assistant/go-eliona/v2/client"
 	"github.com/eliona-smart-building-assistant/go-eliona/v2/frontend"
 	"github.com/google/uuid"
-	"microsoft-365/apiserver"
-	"microsoft-365/appdb"
+	"microsoft-365/v2/apiserver"
+	"microsoft-365/v2/appdb"
 
 	"github.com/eliona-smart-building-assistant/go-utils/common"
 )

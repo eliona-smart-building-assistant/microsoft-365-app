@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/eliona-smart-building-assistant/go-eliona/v2/utils"
-	"microsoft-365/apiserver"
-	"microsoft-365/conf"
+	"microsoft-365/v2/apiserver"
+	"microsoft-365/v2/conf"
 	"time"
 
 	azcore "github.com/Azure/azure-sdk-for-go/sdk/azcore"

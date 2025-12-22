@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/eliona-smart-building-assistant/go-eliona/v2/asset"
-	"microsoft-365/conf"
+	"microsoft-365/v2/conf"
 
 	"github.com/eliona-smart-building-assistant/go-utils/log"
 )

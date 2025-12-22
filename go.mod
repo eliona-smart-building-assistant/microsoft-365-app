@@ -1,4 +1,4 @@
-module microsoft-365
+module microsoft-365/v2
 
 go 1.24.4
 

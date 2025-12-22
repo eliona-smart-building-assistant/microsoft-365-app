@@ -18,8 +18,8 @@ package apiservices
 import (
 	"context"
 	"errors"
-	"microsoft-365/apiserver"
-	"microsoft-365/conf"
+	"microsoft-365/v2/apiserver"
+	"microsoft-365/v2/conf"
 	"net/http"
 )
 

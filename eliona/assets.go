@@ -19,8 +19,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/eliona-smart-building-assistant/go-eliona/v2/asset"
-	"microsoft-365/conf"
-	"microsoft-365/msgraph"
+	"microsoft-365/v2/conf"
+	"microsoft-365/v2/msgraph"
 
 	api "github.com/eliona-smart-building-assistant/go-eliona-api-client/v3"
 	"github.com/eliona-smart-building-assistant/go-utils/common"
