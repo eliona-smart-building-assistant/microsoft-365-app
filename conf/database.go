@@ -41,7 +41,7 @@ func InitDefaultDB() *postgres.Pool {
 }
 
 func openPool() *postgres.Pool {
-	pool, err := elionabackend.GetDatabasePoolWithOverrideRole(context.Background(), "eliona", "saml-sso-app", 10, postgres.WithResetOnAcquire())
+	pool, err := elionabackend.GetDatabasePoolWithOverrideRole(context.Background(), "eliona", "microsoft-365-app", 10, postgres.WithResetOnAcquire())
 	if err != nil {
 		log.Fatal("Database", "Cannot open database: %v", err)
 	}

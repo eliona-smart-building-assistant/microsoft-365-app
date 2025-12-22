@@ -9,7 +9,6 @@ require (
 	github.com/aarondl/null/v8 v8.1.3
 	github.com/aarondl/sqlboiler/v4 v4.19.5
 	github.com/aarondl/strmangle v0.0.9
-	github.com/eliona-smart-building-assistant/app-integration-tests v1.1.2
 	github.com/eliona-smart-building-assistant/backend-frm v0.0.2
 	github.com/eliona-smart-building-assistant/go-eliona-api-client/v3 v3.0.6
 	github.com/eliona-smart-building-assistant/go-eliona/v2 v2.0.4
@@ -33,7 +32,6 @@ require (
 	github.com/cjlapao/common-go v0.0.48 // indirect
 	github.com/cloudflare/circl v1.6.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/eliona-smart-building-assistant/go-eliona v1.9.31 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/gofrs/uuid v4.4.0+incompatible // indirect
@@ -67,7 +65,6 @@ replace github.com/ericlagergren/decimal => github.com/ericlagergren/decimal v0.
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.12.0
-	github.com/eliona-smart-building-assistant/go-eliona-api-client/v2 v2.8.2 // indirect
 	github.com/friendsofgo/errors v0.9.2
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.14.3 // indirect

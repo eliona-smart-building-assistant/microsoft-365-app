@@ -32,7 +32,6 @@ COPY --from=build /app ./
 COPY conf/*.sql ./conf/
 COPY eliona/*.json ./eliona/
 COPY openapi.yaml ./
-COPY metadata.json ./
 
 ENV TZ=Europe/Zurich
 CMD [ "/app" ]
