@@ -19,6 +19,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/eliona-smart-building-assistant/go-eliona/v2/app"
+	"github.com/eliona-smart-building-assistant/go-eliona/v2/client"
 	"microsoft-365/apiserver"
 	"microsoft-365/appdb"
 	"microsoft-365/conf"
@@ -28,8 +30,7 @@ import (
 	"sync"
 	"time"
 
-	api "github.com/eliona-smart-building-assistant/go-eliona-api-client/v2"
-	"github.com/eliona-smart-building-assistant/go-eliona/client"
+	api "github.com/eliona-smart-building-assistant/go-eliona-api-client/v3"
 	"github.com/eliona-smart-building-assistant/go-utils/log"
 )
 
@@ -75,7 +76,7 @@ func NewBookingAPIService() apiserver.BookingAPIServicer {
 	return &BookingAPIService{}
 }
 
-func fetchDBData(ctx context.Context, assetId string) (*appdb.Asset, *apiserver.Configuration, apiserver.ImplResponse, error) {
+func fetchDBData(ctx context.Context, assetId string) (*appdb.Asset, *conf.Configuration, apiserver.ImplResponse, error) {
 	assetIdInt64, err := strconv.ParseInt(assetId, 10, 32)
 	if err != nil {
 		return nil, nil, apiserver.Response(http.StatusBadRequest, nil), fmt.Errorf("parsing asset ID: %v", err)
@@ -199,9 +200,18 @@ func (s *BookingAPIService) BookingsBookingIdDeletePost(ctx context.Context, boo
 
 // BookingsBookingIdRegisterGuestPost - Notify event organizer that a guest came for the event.
 func (s *BookingAPIService) BookingsBookingIdRegisterGuestPost(ctx context.Context, bookingId string, bookingsBookingIdRegisterGuestPostRequest apiserver.BookingsBookingIdRegisterGuestPostRequest) (apiserver.ImplResponse, error) {
+	tenantId, err := conf.ParseTenantIdFromEnv(ctx)
+	if err != nil {
+		return apiserver.ImplResponse{Code: http.StatusBadRequest}, err
+	}
+	apiKey, err := app.GetApiKey("microsoft-365", conf.GetDB(), tenantId)
+	if err != nil {
+		return apiserver.ImplResponse{Code: http.StatusBadRequest}, err
+	}
+
 	message := *api.NewMessage([]string{bookingsBookingIdRegisterGuestPostRequest.NotificationRecipient}, bookingsBookingIdRegisterGuestPostRequest.MessageEn)
 
-	if _, _, err := client.NewClient().CommunicationAPI.PostMail(client.AuthenticationContext()).Message(message).Execute(); err != nil {
+	if _, _, err := client.NewClient(client.ApiEndpointString()).CommunicationAPI.PostMail(client.AuthenticationContext(apiKey)).Message(message).Execute(); err != nil {
 		log.Error("eliona", "calling CommunicationAPI.PostMail: %v", err)
 		return apiserver.Response(http.StatusInternalServerError, nil), fmt.Errorf("internal server error")
 	}
@@ -215,7 +225,7 @@ func (s *BookingAPIService) BookingsBookingIdRegisterGuestPost(ctx context.Conte
 	})
 	notification := *api.NewNotification(bookingsBookingIdRegisterGuestPostRequest.NotificationRecipient, ntf)
 
-	if _, _, err := client.NewClient().CommunicationAPI.PostNotification(client.AuthenticationContext()).Notification(notification).Execute(); err != nil {
+	if _, _, err := client.NewClient(client.ApiEndpointString()).CommunicationAPI.PostNotification(client.AuthenticationContext(apiKey)).Notification(notification).Execute(); err != nil {
 		log.Error("eliona", "calling CommunicationAPI.PostNotification: %v", err)
 		return apiserver.Response(http.StatusInternalServerError, nil), fmt.Errorf("internal server error")
 	}

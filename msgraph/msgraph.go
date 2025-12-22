@@ -3,7 +3,9 @@ package msgraph
 import (
 	"context"
 	"fmt"
+	"github.com/eliona-smart-building-assistant/go-eliona/v2/utils"
 	"microsoft-365/apiserver"
+	"microsoft-365/conf"
 	"time"
 
 	azcore "github.com/Azure/azure-sdk-for-go/sdk/azcore"
@@ -16,7 +18,6 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/users"
 
-	"github.com/eliona-smart-building-assistant/go-eliona/utils"
 	"github.com/eliona-smart-building-assistant/go-utils/common"
 	"github.com/eliona-smart-building-assistant/go-utils/log"
 )
@@ -255,7 +256,7 @@ func (room Room) Id() string {
 	return room.AssetType() + "_" + *room.EmailAddress
 }
 
-func (room *Room) AdheresToFilter(config apiserver.Configuration) (bool, error) {
+func (room *Room) AdheresToFilter(config conf.Configuration) (bool, error) {
 	f := apiFilterToCommonFilter(config.AssetFilter)
 	fp, err := utils.StructToMap(room)
 	if err != nil {
@@ -295,7 +296,7 @@ func apiFilterToCommonFilter(input [][]apiserver.FilterRule) [][]common.FilterRu
 	return result
 }
 
-func (g *GraphHelper) GetRooms(config apiserver.Configuration) ([]Room, error) {
+func (g *GraphHelper) GetRooms(config conf.Configuration) ([]Room, error) {
 	r, err := g.userClient.Places().GraphRoom().Get(context.Background(), nil)
 	if err != nil {
 		return nil, fmt.Errorf("querying rooms API: %+v", err)
@@ -361,7 +362,7 @@ func (equipment Equipment) Id() string {
 	return equipment.AssetType() + "_" + *equipment.EmailAddress
 }
 
-func (equipment *Equipment) AdheresToFilter(config apiserver.Configuration) (bool, error) {
+func (equipment *Equipment) AdheresToFilter(config conf.Configuration) (bool, error) {
 	f := apiFilterToCommonFilter(config.AssetFilter)
 	fp, err := utils.StructToMap(equipment)
 	if err != nil {
@@ -387,7 +388,7 @@ func (e *Equipment) setOnSchedule(s *string) {
 	e.IsOccupied = &occ
 }
 
-func (g *GraphHelper) GetEquipment(config apiserver.Configuration) ([]Equipment, error) {
+func (g *GraphHelper) GetEquipment(config conf.Configuration) ([]Equipment, error) {
 	// It would be wonderful if this filter worked. For some reason, mailboxSettings
 	// can be accessed only user by user. See
 	// https://feedbackportal.microsoft.com/feedback/idea/65df37d3-8f21-ee11-a81c-002248510ddf

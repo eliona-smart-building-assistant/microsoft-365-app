@@ -18,6 +18,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/eliona-smart-building-assistant/go-eliona/v2/asset"
 	"microsoft-365/apiserver"
 	"microsoft-365/apiservices"
 	"microsoft-365/conf"
@@ -27,30 +28,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/eliona-smart-building-assistant/go-eliona/app"
-	"github.com/eliona-smart-building-assistant/go-eliona/asset"
 	"github.com/eliona-smart-building-assistant/go-utils/common"
-	"github.com/eliona-smart-building-assistant/go-utils/db"
 	utilshttp "github.com/eliona-smart-building-assistant/go-utils/http"
 	"github.com/eliona-smart-building-assistant/go-utils/log"
 	"github.com/gorilla/mux"
 )
 
 var once sync.Once
-
-func initialize() {
-	ctx := context.Background()
-
-	// Necessary to close used init resources
-	conn := db.NewInitConnectionWithContextAndApplicationName(ctx, app.AppName())
-	defer conn.Close(ctx)
-
-	// Init the app before the first run.
-	app.Init(conn, app.AppName(),
-		app.ExecSqlFile("conf/init.sql"),
-		asset.InitAssetTypeFiles("eliona/asset-type-*.json"),
-	)
-}
 
 // collectData is the main app function which is called periodically
 func collectData() {
@@ -67,6 +51,7 @@ func collectData() {
 	}
 
 	for _, config := range configs {
+
 		if !conf.IsConfigEnabled(config) {
 			if conf.IsConfigActive(config) {
 				conf.SetConfigActiveState(context.Background(), config, false)
@@ -75,7 +60,7 @@ func collectData() {
 		}
 
 		if !conf.IsConfigActive(config) {
-			conf.SetConfigActiveState(context.Background(), config, true)
+			_, _ = conf.SetConfigActiveState(context.Background(), config, true)
 			log.Info("conf", "Collecting initialized with Configuration %d:\n"+
 				"Enable: %t\n"+
 				"Refresh Interval: %d\n"+
@@ -84,11 +69,15 @@ func collectData() {
 				*config.Id,
 				*config.Enable,
 				config.RefreshInterval,
-				*config.RequestTimeout,
-				*config.ProjectIDs)
+				*config.RequestTimeout)
 		}
 
-		common.RunOnceWithParam(func(config apiserver.Configuration) {
+		common.RunOnceWithParam(func(config conf.Configuration) {
+			err := asset.InitAssetTypeFiles(config.ApiEndpoint(), config.ApiKey(), "eliona/asset-type-*.json")
+			if err != nil {
+				return
+			}
+
 			log.Info("main", "Collecting %d started", *config.Id)
 
 			if err := collectResources(config); err != nil {
@@ -102,7 +91,7 @@ func collectData() {
 	}
 }
 
-func collectResources(config apiserver.Configuration) error {
+func collectResources(config conf.Configuration) error {
 	graph := msgraph.NewGraphHelper()
 	if config.ClientSecret == nil || config.Username == nil || config.Password == nil {
 		log.Error("conf", "Shouldn't happen: some values are nil")
@@ -160,7 +149,6 @@ func listenApi() {
 	r.PathPrefix("/").Handler(utilshttp.NewCORSEnabledHandler(apiserver.NewRouter(
 		apiserver.NewConfigurationAPIController(apiservices.NewConfigurationApiService()),
 		apiserver.NewVersionAPIController(apiservices.NewVersionApiService()),
-		apiserver.NewCustomizationAPIController(apiservices.NewCustomizationApiService()),
 		apiserver.NewBookingAPIController(apiservices.NewBookingAPIService()),
 	)))
 

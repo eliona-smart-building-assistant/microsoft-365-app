@@ -20,19 +20,27 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/aarondl/null/v8"
+	"github.com/aarondl/sqlboiler/v4/boil"
+	"github.com/aarondl/sqlboiler/v4/queries"
+	"github.com/eliona-smart-building-assistant/go-eliona/v2/app"
+	"github.com/eliona-smart-building-assistant/go-eliona/v2/client"
+	"github.com/eliona-smart-building-assistant/go-eliona/v2/frontend"
+	"github.com/google/uuid"
 	"microsoft-365/apiserver"
 	"microsoft-365/appdb"
 
 	"github.com/eliona-smart-building-assistant/go-utils/common"
-	"github.com/volatiletech/null/v8"
-	"github.com/volatiletech/sqlboiler/v4/boil"
-	"github.com/volatiletech/sqlboiler/v4/queries"
 )
 
 var ErrBadRequest = errors.New("bad request")
 
 func InsertConfig(ctx context.Context, config apiserver.Configuration) (apiserver.Configuration, error) {
-	dbConfig, err := dbConfigFromApiConfig(config)
+	tenantId, err := ParseTenantIdFromEnv(ctx)
+	if err != nil {
+		return apiserver.Configuration{}, err
+	}
+	dbConfig, err := dbConfigFromApiConfig(config, tenantId)
 	if err != nil {
 		return apiserver.Configuration{}, fmt.Errorf("creating DB config from API config: %v", err)
 	}
@@ -43,7 +51,11 @@ func InsertConfig(ctx context.Context, config apiserver.Configuration) (apiserve
 }
 
 func UpsertConfig(ctx context.Context, config apiserver.Configuration) (apiserver.Configuration, error) {
-	dbConfig, err := dbConfigFromApiConfig(config)
+	tenantId, err := ParseTenantIdFromEnv(ctx)
+	if err != nil {
+		return apiserver.Configuration{}, err
+	}
+	dbConfig, err := dbConfigFromApiConfig(config, tenantId)
 	if err != nil {
 		return apiserver.Configuration{}, fmt.Errorf("creating DB config from API config: %v", err)
 	}
@@ -53,8 +65,13 @@ func UpsertConfig(ctx context.Context, config apiserver.Configuration) (apiserve
 	return config, nil
 }
 
-func GetConfig(ctx context.Context, configID int64) (*apiserver.Configuration, error) {
+func GetConfig(ctx context.Context, configID int64) (*Configuration, error) {
+	tenantId, err := ParseTenantIdFromEnv(ctx)
+	if err != nil {
+		return nil, err
+	}
 	dbConfig, err := appdb.Configurations(
+		appdb.ConfigurationWhere.ElionaTenantID.EQ(tenantId.String()),
 		appdb.ConfigurationWhere.ID.EQ(configID),
 	).OneG(ctx)
 	if err != nil {
@@ -63,7 +80,7 @@ func GetConfig(ctx context.Context, configID int64) (*apiserver.Configuration, e
 	if dbConfig == nil {
 		return nil, ErrBadRequest
 	}
-	apiConfig, err := apiConfigFromDbConfig(dbConfig)
+	apiConfig, err := configFromDbConfig(dbConfig)
 	if err != nil {
 		return nil, fmt.Errorf("creating API config from DB config: %v", err)
 	}
@@ -71,12 +88,17 @@ func GetConfig(ctx context.Context, configID int64) (*apiserver.Configuration, e
 }
 
 func DeleteConfig(ctx context.Context, configID int64) error {
+	tenantId, err := ParseTenantIdFromEnv(ctx)
+	if err != nil {
+		return err
+	}
 	if _, err := appdb.Assets(
 		appdb.AssetWhere.ConfigurationID.EQ(configID),
 	).DeleteAllG(ctx); err != nil {
 		return fmt.Errorf("deleting assets from database: %v", err)
 	}
 	count, err := appdb.Configurations(
+		appdb.ConfigurationWhere.ElionaTenantID.EQ(tenantId.String()),
 		appdb.ConfigurationWhere.ID.EQ(configID),
 	).DeleteAllG(ctx)
 	if err != nil {
@@ -91,8 +113,9 @@ func DeleteConfig(ctx context.Context, configID int64) error {
 	return nil
 }
 
-func dbConfigFromApiConfig(apiConfig apiserver.Configuration) (dbConfig appdb.Configuration, err error) {
+func dbConfigFromApiConfig(apiConfig apiserver.Configuration, tenantId uuid.UUID) (dbConfig appdb.Configuration, err error) {
 	dbConfig.ID = null.Int64FromPtr(apiConfig.Id).Int64
+	dbConfig.ElionaTenantID = tenantId.String()
 	dbConfig.ClientID = apiConfig.ClientId
 	if apiConfig.ClientSecret != nil {
 		dbConfig.ClientSecret = *apiConfig.ClientSecret
@@ -117,45 +140,54 @@ func dbConfigFromApiConfig(apiConfig apiserver.Configuration) (dbConfig appdb.Co
 	}
 	dbConfig.AssetFilter = null.JSONFrom(af)
 	dbConfig.Active = null.BoolFromPtr(apiConfig.Active)
-	if apiConfig.ProjectIDs != nil {
-		dbConfig.ProjectIds = *apiConfig.ProjectIDs
-	}
+	dbConfig.ElionaSiteID = null.StringFromPtr(apiConfig.ElionaSiteId)
 
 	return dbConfig, nil
 }
 
-func apiConfigFromDbConfig(dbConfig *appdb.Configuration) (apiConfig apiserver.Configuration, err error) {
-	apiConfig.Id = &dbConfig.ID
-	apiConfig.ClientId = dbConfig.ClientID
-	apiConfig.ClientSecret = &dbConfig.ClientSecret
-	apiConfig.TenantId = dbConfig.TenantID
-	apiConfig.Username = &dbConfig.Username
-	apiConfig.Password = &dbConfig.Password
-	apiConfig.ForEliona = dbConfig.ForEliona
-	apiConfig.ForProxy = dbConfig.ForProxy
-	apiConfig.Enable = dbConfig.Enable.Ptr()
-	apiConfig.RefreshInterval = dbConfig.RefreshInterval
-	apiConfig.RequestTimeout = &dbConfig.RequestTimeout
+func configFromDbConfig(dbConfig *appdb.Configuration) (config Configuration, err error) {
+	config.Id = &dbConfig.ID
+	config.ClientId = dbConfig.ClientID
+	config.ClientSecret = &dbConfig.ClientSecret
+	config.TenantId = dbConfig.TenantID
+	config.Username = &dbConfig.Username
+	config.Password = &dbConfig.Password
+	config.ForEliona = dbConfig.ForEliona
+	config.ForProxy = dbConfig.ForProxy
+	config.Enable = dbConfig.Enable.Ptr()
+	config.RefreshInterval = dbConfig.RefreshInterval
+	config.RequestTimeout = &dbConfig.RequestTimeout
 	if dbConfig.AssetFilter.Valid {
 		var af [][]apiserver.FilterRule
 		if err := json.Unmarshal(dbConfig.AssetFilter.JSON, &af); err != nil {
-			return apiserver.Configuration{}, fmt.Errorf("unmarshalling assetFilter: %v", err)
+			return Configuration{}, fmt.Errorf("unmarshalling assetFilter: %v", err)
 		}
-		apiConfig.AssetFilter = af
+		config.AssetFilter = af
 	}
-	apiConfig.Active = dbConfig.Active.Ptr()
-	apiConfig.ProjectIDs = common.Ptr[[]string](dbConfig.ProjectIds)
-	return apiConfig, nil
+	config.Active = dbConfig.Active.Ptr()
+	config.ElionaSiteId = dbConfig.ElionaSiteID.Ptr()
+
+	config.elionaTenantId, err = uuid.Parse(dbConfig.ElionaTenantID)
+	if err != nil {
+		return Configuration{}, fmt.Errorf("parsing elionaTenantId: %v", err)
+	}
+	config.apiEndpoint = client.ApiEndpointString()
+	config.apiKey, err = app.GetApiKey("microsoft-365", GetDB(), config.elionaTenantId)
+	if err != nil {
+		return Configuration{}, err
+	}
+
+	return config, nil
 }
 
-func GetConfigs(ctx context.Context) ([]apiserver.Configuration, error) {
+func GetConfigs(ctx context.Context) ([]Configuration, error) {
 	dbConfigs, err := appdb.Configurations().AllG(ctx)
 	if err != nil {
 		return nil, err
 	}
-	var apiConfigs []apiserver.Configuration
+	var apiConfigs []Configuration
 	for _, dbConfig := range dbConfigs {
-		ac, err := apiConfigFromDbConfig(dbConfig)
+		ac, err := configFromDbConfig(dbConfig)
 		if err != nil {
 			return nil, fmt.Errorf("creating API config from DB config: %v", err)
 		}
@@ -164,16 +196,31 @@ func GetConfigs(ctx context.Context) ([]apiserver.Configuration, error) {
 	return apiConfigs, nil
 }
 
-func GetConfigsForEliona(ctx context.Context) ([]apiserver.Configuration, error) {
+type Configuration struct {
+	apiserver.Configuration
+	elionaTenantId uuid.UUID
+	apiEndpoint    string
+	apiKey         string
+}
+
+func (c *Configuration) ApiEndpoint() string {
+	return c.apiEndpoint
+}
+
+func (c *Configuration) ApiKey() string {
+	return c.apiKey
+}
+
+func GetConfigsForEliona(ctx context.Context) ([]Configuration, error) {
 	dbConfigs, err := appdb.Configurations(
 		appdb.ConfigurationWhere.ForEliona.EQ(true),
 	).AllG(ctx)
 	if err != nil {
 		return nil, err
 	}
-	var apiConfigs []apiserver.Configuration
+	var apiConfigs []Configuration
 	for _, dbConfig := range dbConfigs {
-		ac, err := apiConfigFromDbConfig(dbConfig)
+		ac, err := configFromDbConfig(dbConfig)
 		if err != nil {
 			return nil, fmt.Errorf("creating API config from DB config: %v", err)
 		}
@@ -182,7 +229,7 @@ func GetConfigsForEliona(ctx context.Context) ([]apiserver.Configuration, error)
 	return apiConfigs, nil
 }
 
-func GetConfigsForProxy(ctx context.Context) ([]apiserver.Configuration, error) {
+func GetConfigsForProxy(ctx context.Context) ([]Configuration, error) {
 	dbConfigs, err := appdb.Configurations(
 		appdb.ConfigurationWhere.Enable.EQ(null.BoolFrom(true)),
 		appdb.ConfigurationWhere.ForProxy.EQ(true),
@@ -190,9 +237,9 @@ func GetConfigsForProxy(ctx context.Context) ([]apiserver.Configuration, error) 
 	if err != nil {
 		return nil, err
 	}
-	var apiConfigs []apiserver.Configuration
+	var apiConfigs []Configuration
 	for _, dbConfig := range dbConfigs {
-		ac, err := apiConfigFromDbConfig(dbConfig)
+		ac, err := configFromDbConfig(dbConfig)
 		if err != nil {
 			return nil, fmt.Errorf("creating API config from DB config: %v", err)
 		}
@@ -201,7 +248,7 @@ func GetConfigsForProxy(ctx context.Context) ([]apiserver.Configuration, error) 
 	return apiConfigs, nil
 }
 
-func GetConfigsForProxyWithProjectId(ctx context.Context, projectId string) ([]apiserver.Configuration, error) {
+func GetConfigsForProxyWithProjectId(ctx context.Context, elionaSiteId string) ([]Configuration, error) {
 	var dbConfigs []*appdb.Configuration
 	q := fmt.Sprintf(`
 		SELECT *
@@ -209,15 +256,15 @@ func GetConfigsForProxyWithProjectId(ctx context.Context, projectId string) ([]a
 		WHERE
 			enabled = true AND
 			for_proxy = true AND
-			$1 = ANY (project_ids)
+			eliona_site_id = $1 
 	`)
-	if err := queries.RawG(q, projectId).BindG(ctx, dbConfigs); err != nil {
+	if err := queries.RawG(q, elionaSiteId).BindG(ctx, dbConfigs); err != nil {
 		return nil, fmt.Errorf("fetching configuration: %v", err)
 	}
 
-	var apiConfigs []apiserver.Configuration
+	var apiConfigs []Configuration
 	for _, dbConfig := range dbConfigs {
-		ac, err := apiConfigFromDbConfig(dbConfig)
+		ac, err := configFromDbConfig(dbConfig)
 		if err != nil {
 			return nil, fmt.Errorf("creating API config from DB config: %v", err)
 		}
@@ -226,7 +273,7 @@ func GetConfigsForProxyWithProjectId(ctx context.Context, projectId string) ([]a
 	return apiConfigs, nil
 }
 
-func SetConfigActiveState(ctx context.Context, config apiserver.Configuration, state bool) (int64, error) {
+func SetConfigActiveState(ctx context.Context, config Configuration, state bool) (int64, error) {
 	return appdb.Configurations(
 		appdb.ConfigurationWhere.ID.EQ(null.Int64FromPtr(config.Id).Int64),
 	).UpdateAllG(ctx, appdb.M{
@@ -234,18 +281,11 @@ func SetConfigActiveState(ctx context.Context, config apiserver.Configuration, s
 	})
 }
 
-func ProjIds(config apiserver.Configuration) []string {
-	if config.ProjectIDs == nil {
-		return []string{}
-	}
-	return *config.ProjectIDs
-}
-
-func IsConfigActive(config apiserver.Configuration) bool {
+func IsConfigActive(config Configuration) bool {
 	return config.Active == nil || *config.Active
 }
 
-func IsConfigEnabled(config apiserver.Configuration) bool {
+func IsConfigEnabled(config Configuration) bool {
 	return config.Enable == nil || *config.Enable
 }
 
@@ -255,10 +295,9 @@ func SetAllConfigsInactive(ctx context.Context) (int64, error) {
 	})
 }
 
-func InsertAsset(ctx context.Context, config apiserver.Configuration, projId string, globalAssetID string, assetId int32, email string) error {
+func InsertAsset(ctx context.Context, config Configuration, globalAssetID string, assetId int32, email string) error {
 	dbAsset := appdb.Asset{
 		ConfigurationID: null.Int64FromPtr(config.Id).Int64,
-		ProjectID:       projId,
 		GlobalAssetID:   globalAssetID,
 		AssetID:         null.Int32From(assetId),
 		Email:           email,
@@ -266,10 +305,9 @@ func InsertAsset(ctx context.Context, config apiserver.Configuration, projId str
 	return dbAsset.InsertG(ctx, boil.Infer())
 }
 
-func GetAssetId(ctx context.Context, config apiserver.Configuration, projId string, globalAssetID string) (*int32, error) {
+func GetAssetId(ctx context.Context, config Configuration, globalAssetID string) (*int32, error) {
 	dbAsset, err := appdb.Assets(
 		appdb.AssetWhere.ConfigurationID.EQ(null.Int64FromPtr(config.Id).Int64),
-		appdb.AssetWhere.ProjectID.EQ(projId),
 		appdb.AssetWhere.GlobalAssetID.EQ(globalAssetID),
 	).AllG(ctx)
 	if err != nil || len(dbAsset) == 0 {
@@ -282,4 +320,16 @@ func GetAsset(ctx context.Context, assetId int32) (*appdb.Asset, error) {
 	return appdb.Assets(
 		appdb.AssetWhere.AssetID.EQ(null.Int32From(assetId)),
 	).OneG(ctx)
+}
+
+func ParseTenantIdFromEnv(ctx context.Context) (uuid.UUID, error) {
+	env := frontend.GetEnvironment(ctx)
+	if env == nil {
+		return uuid.UUID{}, fmt.Errorf("missing environment JWT")
+	}
+	parsed, err := uuid.Parse(env.TenantId)
+	if err != nil {
+		return uuid.UUID{}, fmt.Errorf("tenant isn't a valid UUID: %s", env.TenantId)
+	}
+	return parsed, err
 }

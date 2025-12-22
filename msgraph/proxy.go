@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"microsoft-365/apiserver"
 	"microsoft-365/conf"
 	"net/http"
 
@@ -28,14 +27,14 @@ func (proxy *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// We are using headers to pass our own parameters, because extra query
 	// parameters are unacceptable for Graph API, while extra headers are
 	// ignored.
-	projectID := r.Header.Get("Eliona-Project-Id")
+	elionaSiteId := r.Header.Get("Eliona-Site-Id")
 
-	var configs []apiserver.Configuration
+	var configs []conf.Configuration
 	var err error
-	if projectID == "" {
+	if elionaSiteId == "" {
 		configs, err = conf.GetConfigsForProxy(r.Context())
 	} else {
-		configs, err = conf.GetConfigsForProxyWithProjectId(r.Context(), projectID)
+		configs, err = conf.GetConfigsForProxyWithProjectId(r.Context(), elionaSiteId)
 	}
 	if err != nil {
 		log.Fatal("conf", "Couldn't read configs from DB: %v", err)

@@ -18,76 +18,68 @@ package eliona
 import (
 	"context"
 	"fmt"
-	"microsoft-365/apiserver"
+	"github.com/eliona-smart-building-assistant/go-eliona/v2/asset"
 	"microsoft-365/conf"
 	"microsoft-365/msgraph"
 
-	api "github.com/eliona-smart-building-assistant/go-eliona-api-client/v2"
-	"github.com/eliona-smart-building-assistant/go-eliona/asset"
+	api "github.com/eliona-smart-building-assistant/go-eliona-api-client/v3"
 	"github.com/eliona-smart-building-assistant/go-utils/common"
 	"github.com/eliona-smart-building-assistant/go-utils/log"
 )
 
-func CreateRoomsAssetsIfNecessary(config apiserver.Configuration, rooms []msgraph.Room) error {
-	for _, projectId := range conf.ProjIds(config) {
-		rootAssetID, err := upsertRootAsset(config, projectId)
+func CreateRoomsAssetsIfNecessary(config conf.Configuration, rooms []msgraph.Room) error {
+	rootAssetID, err := upsertRootAsset(config)
+	if err != nil {
+		return fmt.Errorf("upserting root asset: %v", err)
+	}
+	for _, room := range rooms {
+		id := room.EmailAddress
+		assetType := "microsoft_365_room"
+		name := room.DisplayName
+		_, _, err := upsertAsset(assetData{
+			config:                  config,
+			parentLocationalAssetId: &rootAssetID,
+			identifier:              fmt.Sprintf("%s_%s", assetType, *id),
+			assetType:               assetType,
+			name:                    *name,
+			description:             fmt.Sprintf("%s (%v)", *name, *id),
+			email:                   *room.EmailAddress,
+		})
 		if err != nil {
-			return fmt.Errorf("upserting root asset: %v", err)
-		}
-		for _, room := range rooms {
-			id := room.EmailAddress
-			assetType := "microsoft_365_room"
-			name := room.DisplayName
-			_, _, err := upsertAsset(assetData{
-				config:                  config,
-				projectId:               projectId,
-				parentLocationalAssetId: &rootAssetID,
-				identifier:              fmt.Sprintf("%s_%s", assetType, *id),
-				assetType:               assetType,
-				name:                    *name,
-				description:             fmt.Sprintf("%s (%v)", *name, *id),
-				email:                   *room.EmailAddress,
-			})
-			if err != nil {
-				return fmt.Errorf("upserting room %s: %v", *id, err)
-			}
+			return fmt.Errorf("upserting room %s: %v", *id, err)
 		}
 	}
 	return nil
 }
 
-func CreateEquipmentAssetsIfNecessary(config apiserver.Configuration, equipmentList []msgraph.Equipment) error {
-	for _, projectId := range conf.ProjIds(config) {
-		rootAssetID, err := upsertRootAsset(config, projectId)
+func CreateEquipmentAssetsIfNecessary(config conf.Configuration, equipmentList []msgraph.Equipment) error {
+	rootAssetID, err := upsertRootAsset(config)
+	if err != nil {
+		return fmt.Errorf("upserting root asset: %v", err)
+	}
+	for _, equipment := range equipmentList {
+		id := equipment.EmailAddress
+		assetType := "microsoft_365_equipment"
+		name := equipment.DisplayName
+		_, _, err := upsertAsset(assetData{
+			config:                  config,
+			parentLocationalAssetId: &rootAssetID,
+			identifier:              fmt.Sprintf("%s_%s", assetType, *id),
+			assetType:               assetType,
+			name:                    *name,
+			description:             fmt.Sprintf("%s (%v)", *name, *id),
+			email:                   *equipment.EmailAddress,
+		})
 		if err != nil {
-			return fmt.Errorf("upserting root asset: %v", err)
-		}
-		for _, equipment := range equipmentList {
-			id := equipment.EmailAddress
-			assetType := "microsoft_365_equipment"
-			name := equipment.DisplayName
-			_, _, err := upsertAsset(assetData{
-				config:                  config,
-				projectId:               projectId,
-				parentLocationalAssetId: &rootAssetID,
-				identifier:              fmt.Sprintf("%s_%s", assetType, *id),
-				assetType:               assetType,
-				name:                    *name,
-				description:             fmt.Sprintf("%s (%v)", *name, *id),
-				email:                   *equipment.EmailAddress,
-			})
-			if err != nil {
-				return fmt.Errorf("upserting equipment %s: %v", *id, err)
-			}
+			return fmt.Errorf("upserting equipment %s: %v", *id, err)
 		}
 	}
 	return nil
 }
 
-func upsertRootAsset(config apiserver.Configuration, projectId string) (int32, error) {
+func upsertRootAsset(config conf.Configuration) (int32, error) {
 	_, rootAssetID, err := upsertAsset(assetData{
 		config:                  config,
-		projectId:               projectId,
 		parentLocationalAssetId: nil,
 		identifier:              "microsoft_365_root",
 		assetType:               "microsoft_365_root",
@@ -98,8 +90,7 @@ func upsertRootAsset(config apiserver.Configuration, projectId string) (int32, e
 }
 
 type assetData struct {
-	config                  apiserver.Configuration
-	projectId               string
+	config                  conf.Configuration
 	parentFunctionalAssetId *int32
 	parentLocationalAssetId *int32
 	identifier              string
@@ -111,7 +102,7 @@ type assetData struct {
 
 func upsertAsset(d assetData) (created bool, assetID int32, err error) {
 	// Get known asset id from configuration
-	currentAssetID, err := conf.GetAssetId(context.Background(), d.config, d.projectId, d.identifier)
+	currentAssetID, err := conf.GetAssetId(context.Background(), d.config, d.identifier)
 	if err != nil {
 		return false, 0, fmt.Errorf("finding asset ID: %v", err)
 	}
@@ -120,16 +111,15 @@ func upsertAsset(d assetData) (created bool, assetID int32, err error) {
 	}
 
 	a := api.Asset{
-		ProjectId:               d.projectId,
+		SiteId:                  *api.NewNullableString(d.config.ElionaSiteId),
 		GlobalAssetIdentifier:   d.identifier,
 		Name:                    *api.NewNullableString(common.Ptr(d.name)),
 		AssetType:               d.assetType,
 		Description:             *api.NewNullableString(common.Ptr(d.description)),
 		ParentFunctionalAssetId: *api.NewNullableInt32(d.parentFunctionalAssetId),
 		ParentLocationalAssetId: *api.NewNullableInt32(d.parentLocationalAssetId),
-		IsTracker:               *api.NewNullableBool(common.Ptr(false)),
 	}
-	newID, err := asset.UpsertAsset(a)
+	newID, err := asset.UpsertAsset(d.config.ApiEndpoint(), d.config.ApiKey(), a)
 	if err != nil {
 		return false, 0, fmt.Errorf("upserting asset %+v into Eliona: %v", a, err)
 	}
@@ -138,11 +128,11 @@ func upsertAsset(d assetData) (created bool, assetID int32, err error) {
 	}
 
 	// Remember the asset id for further usage
-	if err := conf.InsertAsset(context.Background(), d.config, d.projectId, d.identifier, *newID, d.email); err != nil {
+	if err := conf.InsertAsset(context.Background(), d.config, d.identifier, *newID, d.email); err != nil {
 		return false, 0, fmt.Errorf("inserting asset to config db: %v", err)
 	}
 
-	log.Debug("eliona", "Created new asset for project %s and device %s.", d.projectId, d.identifier)
+	log.Debug("eliona", "Created new asset for device %s.", d.identifier)
 
 	return true, *newID, nil
 }
